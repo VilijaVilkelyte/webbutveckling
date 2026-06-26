@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lektion 2: Smarta Flashcards</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Flashcard-behållare */
+        .card-container {
+            width: 350px;
+            height: 200px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .front {
+            background-color: #ffffff;
+            color: #0056b3;
+            border: 2px solid #0056b3;
+        }
+
+        .back {
+            background-color: #0056b3;
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        /* Knappar och kontroller */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            height: 45px; /* Fast höjd för att förhindra layout-hopp */
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-check { background-color: #28a745; color: white; }
+        .btn-check:hover { background-color: #218838; }
+
+        .btn-repeat { background-color: #dc3545; color: white; }
+        .btn-repeat:hover { background-color: #c82333; }
+        
+        .btn-restart { background-color: #0056b3; color: white; margin-top: 15px; }
+
+        .counter {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #666;
+        }
+
+        /* Grattis-ruta (gömd som standard) */
+        .success-message {
+            display: none;
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .success-message h2 { color: #28a745; margin-top: 0; }
+
+        /* Hjälpklass för att gömma element */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container" style="display: flex; flex-direction: column; align-items: center;">
+        <h1>Träna på HTML-listor</h1>
+
+        <div class="card-container" onclick="flipCard()">
+            <div class="card" id="flashcard">
+                <div class="front" id="card-front">Fråga</div>
+                <div class="back" id="card-back">Svar</div>
+            </div>
+        </div>
+
+        <div class="controls" id="controls">
+            <button id="btn-repeat" class="btn-repeat hidden" onclick="handleFeedback(false)">Behöver öva mer</button>
+            <button id="btn-check" class="btn-check hidden" onclick="handleFeedback(true)">Det här kan jag</button>
+        </div>
+
+        <div class="counter" id="counter">Återstående kort: -</div>
+    </div>
+
+    <div id="success-message" class="success-message">
+        <h2>🎉 Du är klar, bra jobbat!</h2>
+        <p>Du har satt alla kort i det här kapitlet.</p>
+        <button class="btn-restart" onclick="restartGame()">Starta om</button>
+    </div>
+
+    <script>
+        // Ursprungliga korten
+        const originalCards = [
+            { question: "Vad står &lt;dl&gt; för?", answer: "Descriptive list<br>(Beskrivande lista)" },
+            { question: "Vad står &lt;ol&gt; för?", answer: "Ordnad lista<br>(Numerisk lista)" },
+            { question: "Vilket element används till att skapa en lista med punkter?", answer: " &lt;ul&gt;" },
+            { question: "Vilket element används till att skapa en numerisk lista?", answer: " &lt;ol&gt;" },
+            { question: "Vilket element används till att specificera en term i en beskrivande lista?", answer: " &lt;dt&gt;" },
+            { question: "Vilket element används till att skapa en beskrivande lista?", answer: " &lt;dl&gt;" },
+            { question: "Vilket element används till att specificera en beskrivning i en beskrivande lista?", answer: " &lt;dd&gt;" },
+            { question: "Vilket element används till att specificera ett listobjekt?", answer: " &lt;li&gt;" },
+            { question: "Vilket element används till att skapa en citat?", answer: " &lt;blockquote&gt;" },
+            { question: "Vad används &lt;blockquote&gt; för?", answer: "För att skapa ett citat" },
+            { question: "Vad används &lt;pre&gt; till?", answer: "För att skapa ett förformaterat textblock" },
+            { question: "Vilket element används till att låsa textformateringen?", answer: "&lt;pre&gt;" },
+            { question: "Vad är syntaxen till att kommentera kod?", answer: "&lt;!-- kommentar --&gt" },
+            { question: "Vad används  &lt;section&gt; för?", answer: "För att markera en sektion i dokumentet." },
+            { question: "Vad används  &lt;article&gt; för?", answer: "För att markera ett självständigt innehåll." },
+            { question: "Vilket element används till att gruppera innehåll under ett gemensamt tema?", answer: " &lt;section&gt;" },
+            { question: "Vilket element används till att markera ett självständigt innehåll?", answer: " &lt;article&gt;" },
+            { question: "Vilket element används till att gruppera inehåll där varken &lt;section&gt; eller &lt;article&gt; passar?", answer: " &lt;div&gt;" },
+            { question: "Vad används &lt;div&gt; till?", answer: "För att gruppera innehåll." },
+            { question: "Vad står &lt;ul&gt; för?", answer: "Oordnad lista<br>(Unordered list)" }
+        ];
+
+        // Den aktiva kortleken som ändras under spelets gång
+        let deck = [...originalCards];
+        let isFlipped = false;
+
+        const card = document.getElementById('flashcard');
+        const front = document.getElementById('card-front');
+        const back = document.getElementById('card-back');
+        const counter = document.getElementById('counter');
+        const btnCheck = document.getElementById('btn-check');
+        const btnRepeat = document.getElementById('btn-repeat');
+        const gameContainer = document.getElementById('game-container');
+        const successMessage = document.getElementById('success-message');
+
+        function updateCard() {
+            if (deck.length === 0) {
+                // Eleven är klar!
+                gameContainer.style.display = 'none';
+                successMessage.style.display = 'block';
+                return;
+            }
+
+            // Återställ kortets rotation och dölj knappar
+            card.classList.remove('flipped');
+            isFlipped = false;
+            btnCheck.classList.add('hidden');
+            btnRepeat.classList.add('hidden');
+
+            // Uppdatera texten (med en liten fördröjning så det inte syns under vändningen)
+            setTimeout(() => {
+                front.innerHTML = deck[0].question;
+                back.innerHTML = deck[0].answer;
+                counter.innerText = `Kort kvar att klara: ${deck.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            card.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+
+            // Visa knapparna när kortet har vänts till baksidan
+            if (isFlipped) {
+                btnCheck.classList.remove('hidden');
+                btnRepeat.classList.remove('hidden');
+            } else {
+                btnCheck.classList.add('hidden');
+                btnRepeat.classList.add('hidden');
+            }
+        }
+
+        function handleFeedback(knowsIt) {
+            // Hindra att klick på knapparna vänder tillbaka kortet via card-container
+            event.stopPropagation(); 
+
+            if (knowsIt) {
+                // Ta bort det första kortet (eleven kunde det)
+                deck.shift();
+            } else {
+                // Flytta det första kortet till slutet av arrayen (behöver övas mer)
+                const currentCard = deck.shift();
+                deck.push(currentCard);
+            }
+
+            updateCard();
+        }
+
+        function restartGame() {
+            // Återställ kortleken och visa spelplanen igen
+            deck = [...originalCards];
+            successMessage.style.display = 'none';
+            gameContainer.style.display = 'flex';
+            updateCard();
+        }
+
+        // Starta spelet direkt
+        updateCard();
+    </script>
+
+</body>
+</html>
