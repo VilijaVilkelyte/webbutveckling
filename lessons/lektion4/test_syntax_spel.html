@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syntax-test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .quiz-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .progress {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .question {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            white-space: pre-line;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1em;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
+        .primary-btn {
+            background-color: #007BFF;
+            color: white;
+            flex: 2;
+        }
+        .primary-btn:hover {
+            background-color: #0056b3;
+        }
+        .secondary-btn {
+            background-color: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .secondary-btn:hover {
+            background-color: #5a6268;
+        }
+        .feedback {
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+            margin-top: 10px;
+        }
+        .feedback.correct {
+            display: block;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.wrong {
+            display: block;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .feedback.give-up {
+            display: block;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .clue {
+            font-weight: normal;
+            font-style: italic;
+            margin-top: 5px;
+            display: block;
+        }
+        .revealed-syntax {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #000;
+            display: inline-block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container" id="quiz-box">
+    <div class="progress" id="progress">Fråga 1</div>
+    <div class="question" id="question-text">Laddar fråga...</div>
+    
+    <input type="text" id="answer-input" autocomplete="off" placeholder="Skriv den exakta syntaxen här..." autofocus>
+    
+    <div class="btn-container">
+        <button id="submit-btn" class="primary-btn" onclick="checkAnswer()">Kontrollera svar</button>
+        <button id="giveup-btn" class="secondary-btn" onclick="revealAnswer()">Visa svaret</button>
+    </div>
+    
+    <div id="feedback-box" class="feedback"></div>
+</div>
+
+<script>
+    let quizData = [
+        {
+            question: "Vilket element används för att skapa ett formulär i HTML?",
+            correctAnswer: "<form>",
+            clue: "Tänk på vilket syntax som element definieras med i HTML."
+        },
+        {
+            question: "Ange en kodrad som tillåter användaren skriva in text ",
+            correctAnswer: "<input type=\"text\">",
+            clue: "endast input och text som type behöver vara med."
+        },
+        {
+            question: "Ange en kodrad som skapar en knapp (ej input) som skickar formuläret",
+            correctAnswer: "<button type=\"submit\">Skicka</button>",
+            clue: "Tänk på vilken type som behövs för att skapa en knapp som skickar formuläret."
+        },
+        {
+            question: "Ange en kodrad som låter användaren skriva in text men där prickar istället för text visas (t.ex. för lösenord)",
+            correctAnswer: "<input type=\"password\">",
+            clue: "Tänk på vilket type attribut som ska vara med."
+        },
+        {
+            question: "Ange koden som saknas i kodsnutten nedan så att 2 radioknappar skapas \"Ja\" och \"Nej\". \n \n <input ______________ name=\"val\" value=\"ja\"> \n <label>Ja</label><br>\n<input ______________ name=\"val\" value=\"nej\"> <label>Nej</label>",
+            correctAnswer: "type=\"radio\"",
+            clue: "Vilken type ska användas?"
+        },
+        {
+            question: "",
+            correctAnswer: "",
+            clue: ""
+        },
+        {
+            question: "",
+            correctAnswer: "",
+            clue: ""
+        },
+        {
+            question: "",
+            correctAnswer: "",
+            clue: ""
+        },
+        {
+            question: "",
+            correctAnswer: "",
+            clue: ""
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let totalQuestionsAnsweredCorrectly = 0; // Håller koll på hur många unika som är avklarade om du vill bygga ut räknare
+
+    const progressEl = document.getElementById("progress");
+    const questionEl = document.getElementById("question-text");
+    const inputEl = document.getElementById("answer-input");
+    const feedbackEl = document.getElementById("feedback-box");
+    const submitBtn = document.getElementById("submit-btn");
+    const giveupBtn = document.getElementById("giveup-btn");
+
+    function loadQuestion() {
+        if (currentQuestionIndex < quizData.length) {
+            // Återställ input, knappar och feedback
+            inputEl.value = "";
+            inputEl.disabled = false;
+            
+            submitBtn.textContent = "Kontrollera svar";
+            submitBtn.onclick = checkAnswer;
+            
+            giveupBtn.style.display = "block"; 
+            
+            feedbackEl.className = "feedback";
+            feedbackEl.innerHTML = "";
+            
+            // Uppdatera text (Visar nuvarande position i kön)
+            progressEl.textContent = `Fråga ${currentQuestionIndex + 1} i kön (Totalt kvar: ${quizData.length - currentQuestionIndex})`;
+            questionEl.textContent = quizData[currentQuestionIndex].question;
+            inputEl.focus();
+        } else {
+            // Om listan är helt tom / slut
+            document.getElementById("quiz-box").innerHTML = "<h2>Snyggt jobbat!</h2><p>Du har tagit dig igenom och svarat rätt på alla frågor!</p>";
+        }
+    }
+
+    function checkAnswer() {
+        const userAnswer = inputEl.value;
+        const currentQuestion = quizData[currentQuestionIndex];
+
+        if (userAnswer === currentQuestion.correctAnswer) {
+            // RÄTT SVAR
+            feedbackEl.className = "feedback correct";
+            feedbackEl.innerHTML = "Helt rätt! Bra gjort.";
+            inputEl.disabled = true;
+            giveupBtn.style.display = "none";
+            
+            submitBtn.textContent = "Nästa fråga";
+            submitBtn.onclick = nextQuestion;
+        } else {
+            // FEL SVAR - Flytta frågan till slutet av listan
+            feedbackEl.className = "feedback wrong";
+            feedbackEl.innerHTML = `Tyvärr inte helt rätt. <span class="clue"><strong>Tips:</strong> ${currentQuestion.clue}</span><br><small style="font-weight:normal; color:#888;">Frågan har flyttats till slutet av testet så du får försöka igen senare.</small>`;
+            
+            // Kopiera och tryck in sist i arrayen
+            quizData.push({ ...currentQuestion });
+        }
+    }
+
+    function revealAnswer() {
+        const currentQuestion = quizData[currentQuestionIndex];
+        feedbackEl.className = "feedback give-up";
+        feedbackEl.innerHTML = `Rätt svar är:<br><span class="revealed-syntax">${escapeHtml(currentQuestion.correctAnswer)}</span>`;
+        
+        // Lås inputfältet så de inte behöver skriva
+        inputEl.disabled = true;
+        giveupBtn.style.display = "none";
+        
+        // Förvandla kontrollknappen till "Nästa fråga"
+        submitBtn.textContent = "Nästa fråga";
+        submitBtn.onclick = nextQuestion;
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        loadQuestion();
+    }
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Enter fungerar både för att kontrollera och för att gå vidare
+    inputEl.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            submitBtn.click();
+        }
+    });
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
