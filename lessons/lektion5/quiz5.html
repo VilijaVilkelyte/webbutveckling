@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="sv" class="h-full bg-slate-50 text-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Inbäddad Media</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-full flex flex-col justify-center items-center p-4 md:p-6 bg-slate-50">
+    <div class="w-full max-w-2xl bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden p-6 md:p-8">
+        <!-- ACTIVE QUIZ SCREEN -->
+        <div id="quiz-screen">
+            <!-- Header progress info -->
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+                <span class="text-sm font-semibold text-indigo-600 uppercase tracking-wider">
+                    Fråga <span id="current-question-num">1</span> av 20
+                </span>
+                <span id="score-badge" class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+                    Poäng: <span id="live-score">0</span>
+                </span>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="w-full bg-slate-100 rounded-full h-1.5 mb-6">
+                <div id="progress-bar-fill" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-300" style="width: 5%;"></div>
+            </div>
+
+            <!-- Question container -->
+            <div class="space-y-6">
+                <h2 id="question-text" class="text-lg md:text-xl font-bold leading-relaxed text-slate-900">
+                    Laddar fråga...
+                </h2>
+                
+                <!-- Options Container -->
+                <div id="options-container" class="grid grid-cols-1 gap-3">
+                    <!-- Injected by JavaScript -->
+                </div>
+
+                <!-- Feedback & Explanation Card -->
+                <div id="feedback-card" class="hidden border-l-4 p-4 rounded-r-lg rounded-l-sm transition-all duration-200">
+                    <p id="feedback-title" class="font-bold text-sm mb-1"></p>
+                    <p id="feedback-explanation" class="text-xs md:text-sm text-slate-600 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- Navigation Bar -->
+            <div class="flex items-center justify-between border-t border-slate-100 pt-6 mt-6">
+                <button id="prev-btn" onclick="prevQuestion()" disabled
+                    class="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-md disabled:opacity-30 disabled:pointer-events-none transition-all">
+                    Föregående
+                </button>
+
+                <button id="next-btn" onclick="nextQuestion()"
+                    class="px-5 py-2 text-xs font-semibold text-slate-400 bg-slate-100 border border-slate-200 rounded-md cursor-not-allowed transition-all">
+                    Svara för att gå vidare
+                </button>
+            </div>
+        </div>
+
+        <!-- END / SCORE SCREEN -->
+        <div id="end-screen" class="hidden text-center py-6 space-y-6">
+            <h2 class="text-2xl font-bold text-slate-900">Quizet är klart!</h2>
+            
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 max-w-sm mx-auto">
+                <p class="text-slate-500 text-sm">Ditt slutresultat</p>
+                <p class="text-4xl font-extrabold text-indigo-600 mt-2">
+                    <span id="final-score">0</span> / 20 rätt
+                </p>
+                <p id="percentage-text" class="text-slate-500 text-xs mt-1">(0%)</p>
+            </div>
+
+            <button onclick="restartQuiz()" 
+                class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-md shadow-sm transition-all inline-block">
+                Starta om quizet
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Complete 20 questions mapping exactly to your Lektion 5 presentation
+        const questions = [
+            {
+                question: "Vad står förkortningen \"iframe\" för?",
+                options: ["Inline frame", "Interactive frame", "Internal frame", "Integrated frame"],
+                correctIndex: 0,
+                explanation: "Iframe står för 'Inline frame'. Det fungerar som ett virtuellt fönster som lägger in en extern sida eller fil inuti din nuvarande sida."
+            },
+            {
+                question: "Vilket attribut används på en iframe för att ange vilken källfil eller webbadress som ska visas?",
+                options: ["href", "src", "link", "source"],
+                correctIndex: 1,
+                explanation: "Attributet 'src' (source/källa) anger sökvägen till resursen (t.ex. en video, karta eller lokal HTML-fil)."
+            },
+            {
+                question: "Vilket av följande är ett typiskt exempel på externt innehåll som bäst bäddas in med en iframe?",
+                options: ["En lokal CSS-stylesheet", "Interaktiva Google Maps-kartor", "En lokal bildfil (JPG/PNG)", "En länkad extern JavaScript-fil"],
+                correctIndex: 1,
+                explanation: "Google Maps-kartor, YouTube-spelare samt interaktiva simuleringar är vanliga resurser som bäddas in via iframe."
+            },
+            {
+                question: "Vilken HTML-kod är korrekt skriven för att bädda in en lokal fil 'kontakt.html' med en tillgänglig titel?",
+                options: [
+                    "&lt;iframe src=\"kontakt.html\" title=\"Kontaktsida\"&gt;&lt;/iframe&gt;",
+                    "&lt;iframe link=\"kontakt.html\" title=\"Kontaktsida\"&gt;&lt;/iframe&gt;",
+                    "&lt;iframe src=\"kontakt.html\" alt=\"Kontaktsida\"&gt;&lt;/iframe&gt;",
+                    "&lt;iframe href=\"kontakt.html\" title=\"Kontaktsida\"&gt;&lt;/iframe&gt;"
+                ],
+                correctIndex: 0,
+                explanation: "Korrekt iframe-syntax kräver 'src' för sökvägen, 'title' för tillgänglighet samt en obligatorisk avslutande tagg (</iframe>)."
+            },
+            {
+                question: "Sant eller falskt: En iframe behöver ingen avslutningstagg (<\/iframe>).",
+                options: ["Sant", "Falskt"],
+                correctIndex: 1,
+                explanation: "Falskt! En iframe är inte en tom tagg (void-element). Man får aldrig glömma den matchande avslutningstaggen (<\/iframe>)."
+            },
+            {
+                question: "Varför kräver tillgänglighetsprinciper (WCAG) att du sätter attributet \"title\" på alla dina iframes?",
+                options: [
+                    "För att öka sidans laddningshastighet",
+                    "För att låta skärmläsare förstå och beskriva det inbäddade innehållet",
+                    "För att tillåta JavaScript-körning i webbläsaren",
+                    "För att göra det lättare för sökmotorer att hitta länken"
+                ],
+                correctIndex: 1,
+                explanation: "Skärmläsare läser upp värdet i 'title'-attributet så att användare med synnedsättning direkt förstår vad det inbäddade blocket innehåller."
+            },
+            {
+                question: "Vilket attribut ska alltid finnas med i en img-tagg för att beskriva bilden för skärmläsare?",
+                options: ["title", "src", "alt", "lang"],
+                correctIndex: 2,
+                explanation: "Attributet 'alt' (alternativ text) används av skärmläsare för att läsa upp en ljudbeskrivning av vad bilden föreställer."
+            },
+            {
+                question: "Varför är det viktigt att sätta attributet \"lang\" i html-taggen på din sida?",
+                options: [
+                    "För att optimera källkoden för sökmotorer",
+                    "Så skärmläsare kan använda korrekt uttal, intonation och röst",
+                    "För att webbplatsen automatiskt ska översättas till engelska",
+                    "För att webbläsaren ska aktivera det inbyggda säkerhetsfiltret"
+                ],
+                correctIndex: 1,
+                explanation: "Genom att ange språk (t.ex. lang='sv') vet skärmläsaren vilken språksyntes och vilket uttal den ska tillämpa på sidans text."
+            },
+            {
+                question: "Vilken säkerhetsrisk innebär att en angripare döljer en osynlig iframe ovanpå en legitim och synlig knapp på en betrodd webbplats?",
+                options: [
+                    "Cross Site Scripting (XSS)",
+                    "Clickjacking (klick-kapning)",
+                    "Denial of Service (DoS)",
+                    "Phishing (nätfiske)"
+                ],
+                correctIndex: 1,
+                explanation: "Clickjacking innebär att man döljer en osynlig iframe över en sajt så att användaren luras att klicka på dolda knappar eller länkar."
+            },
+            {
+                question: "Vad är det huvudsakliga målet för en angripare som lyckas utföra en Cross Site Scripting (XSS)-attack via en osäker iframe?",
+                options: [
+                    "Att överbelasta nätverket så att servern kraschar",
+                    "Att köra skadliga skript för att exempelvis stjäla cookies och sessionsdata",
+                    "Att byta ut logotypen på den externa webbplatsen",
+                    "Att radera användarens alla bokmärken i webbläsaren"
+                ],
+                correctIndex: 1,
+                explanation: "Med XSS kan skadlig JavaScript-kod köras inuti offrets webbläsare, vilket ger angriparen åtkomst till cookies och aktiva sessioner."
+            },
+            {
+                question: "Hur kan en iframe utnyttjas av en bedragare i en klassisk Phishing-attack (nätfiske)?",
+                options: [
+                    "Genom att visa en falsk inloggningskopia av en betrodd webbplats inuti en iframe",
+                    "Genom att skicka dolda e-postmeddelanden från användarens dator",
+                    "Genom att blockera åtkomsten till operativsystemet",
+                    "Genom att tvinga webbläsaren att byta standardsökmotor"
+                ],
+                correctIndex: 0,
+                explanation: "Genom att bädda in en identisk, men falsk, inloggningssida kan bedragare lura användare att skriva in känsliga användaruppgifter."
+            },
+            {
+                question: "Vad innebär en \"Denial of Service\" (DoS) attack utförd med hjälp av dolda iframes?",
+                options: [
+                    "Att dölja känslig kod för webbplatsens administratör",
+                    "Att generera ett enormt antal automatiska anrop till en server för att överbelasta den",
+                    "Att ändra på behörighetsinställningarna för användarens konto",
+                    "Att stoppa skript från att köras i bakgrunden"
+                ],
+                correctIndex: 1,
+                explanation: "Dolda iframes kan programmeras att upprepade gånger anropa en specifik webbserver, vilket överbelastar den och gör sidan oåtkomlig."
+            },
+            {
+                question: "Vad är huvudsyftet med attributet \"sandbox\" på en iframe-tagg?",
+                options: [
+                    "Att göra den inbäddade rutan helt responsiv på mobilskärmar",
+                    "Att styra, hantera och kraftigt begränsa säkerhetsriskerna",
+                    "Att dölja iframens kantlinjer och bakgrundsfärger",
+                    "Att låta utvecklare redigera källkoden direkt från preview-läget"
+                ],
+                correctIndex: 1,
+                explanation: "Sandbox är en säkerhetsfunktion som låser ner iframen och begränsar vad källan får göra (t.ex. blockera automatiska skript)."
+            },
+            {
+                question: "Vad händer om du lägger till attributet \"sandbox\" på en YouTube-iframe utan att ange några specifika värden (ett så kallat 'strikt sandbox-läge')?",
+                options: [
+                    "Videon spelas upp med dubbel hastighet",
+                    "Videon slutar fungera eftersom JavaScript blockeras som standard",
+                    "Videon anpassas automatiskt efter enhetens ljusläge",
+                    "Inget händer, det fungerar exakt som vanligt"
+                ],
+                correctIndex: 1,
+                explanation: "När sandbox-attributet lämnas tomt aktiveras alla restriktioner. Eftersom YouTube kräver JavaScript för sin spelare slutar videon att fungera."
+            },
+            {
+                question: "Vilket specifikt sandbox-värde måste du ange för att tillåta att ett formulär skickas och bearbetas inuti iframen?",
+                options: ["allow-scripts", "allow-same-origin", "allow-forms", "allow-modals"],
+                correctIndex: 2,
+                explanation: "Värdet 'allow-forms' är den specifika tillåtelse som krävs för att låta användare skicka in formulär inuti en sandlåde-iframe."
+            },
+            {
+                question: "Vad tillåter sandbox-värdet \"allow-scripts\"?",
+                options: [
+                    "Körning av JavaScript-skript inuti iframen",
+                    "Skrivning och lagring av cookies på användarens lokala disk",
+                    "Inläsning av externa bilder utan säkerhetscertifikat",
+                    "Automatisk öppning av popup-fönster"
+                ],
+                correctIndex: 0,
+                explanation: "Värdet 'allow-scripts' upphäver den strikta JavaScript-blockeringen så att dynamiska funktioner inuti iframen kan köras."
+            },
+            {
+                question: "Vag gör allow attributet?",
+                options: ["Lägger skydd mot intrång", "Tillåter helskärmsläget", "Tillåter oss att bestämma hur användaren ska kunna interagera med iframen", "Blockerar automatiska pop-ups"],
+                correctIndex: 2,
+                explanation: ""
+            },
+            {
+                question: "Vilken kodrad skapar en iframe med bredd 500, höjd 300, visar video.html, har titeln 'Demovideo' samt tillåter skript och same-origin i sandboxen?",
+                options: [
+                    "&lt;iframe width=\"500\" height=\"300\" src=\"video.html\" title=\"Demovideo\" sandbox=\"allow-scripts allow-same-origin\"&gt;&lt;/iframe&gt;",
+                    "&lt;iframe size=\"500,300\" link=\"video.html\" alt=\"Demovideo\" sandbox&gt;&lt;/iframe&gt;",
+                    "&lt;iframe width=\"500\" height=\"300\" src=\"video.html\" title=\"Demovideo\" sandbox=\"allow-forms\"&gt;",
+                    "&lt;iframe width=\"500\" height=\"300\" link=\"video.html\" title=\"Demovideo\" sandbox=\"all\"&gt;&lt;/iframe&gt;"
+                ],
+                correctIndex: 0,
+                explanation: "Detta alternativ använder rätt attribut (width, height, src, title, sandbox), har korrekt syntax samt en avslutningstagg."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = Array(questions.length).fill(null);
+        let hasAnsweredCurrent = false;
+
+        // Start directly with the first question on page load
+        window.onload = function () {
+            loadQuestion(0);
+        }
+
+        function loadQuestion(index) {
+            currentQuestionIndex = index;
+            hasAnsweredCurrent = userAnswers[index] !== null;
+
+            // Update UI progress counters
+            document.getElementById("current-question-num").innerText = index + 1;
+            const percentage = ((index + 1) / questions.length) * 100;
+            document.getElementById("progress-bar-fill").style.width = `${percentage}%`;
+
+            // Style navigation buttons
+            document.getElementById("prev-btn").disabled = index === 0;
+            
+            const nextBtn = document.getElementById("next-btn");
+            if (hasAnsweredCurrent) {
+                nextBtn.innerHTML = index === questions.length - 1 ? 'Visa Resultat' : 'Nästa';
+                nextBtn.className = "px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-sm transition-all cursor-pointer";
+            } else {
+                nextBtn.innerHTML = 'Svara för att gå vidare';
+                nextBtn.className = "px-5 py-2 text-xs font-semibold text-slate-400 bg-slate-100 border border-slate-200 rounded-md cursor-not-allowed transition-all";
+            }
+
+            // Write Question Text
+            const qData = questions[index];
+            document.getElementById("question-text").innerText = qData.question;
+
+            // Render options
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+
+            qData.options.forEach((optionText, i) => {
+                const optionBtn = document.createElement("button");
+                optionBtn.onclick = () => selectOption(i);
+                optionBtn.className = "w-full text-left p-3.5 rounded-lg border text-sm transition-all duration-150 flex justify-between items-center focus:outline-none ";
+                
+                if (hasAnsweredCurrent) {
+                    optionBtn.disabled = true; // Block multiple clicks
+                    const isSelected = userAnswers[index] === i;
+                    const isCorrectOption = qData.correctIndex === i;
+
+                    if (isCorrectOption) {
+                        optionBtn.className += " bg-emerald-50 border-emerald-500 text-emerald-800 font-medium";
+                        optionBtn.innerHTML = `<span>${optionText}</span> <span class="text-emerald-600 font-bold">✓</span>`;
+                    } else if (isSelected) {
+                        optionBtn.className += " bg-red-50 border-red-500 text-red-800 font-medium";
+                        optionBtn.innerHTML = `<span>${optionText}</span> <span class="text-red-600 font-bold">✗</span>`;
+                    } else {
+                        optionBtn.className += " bg-slate-50 border-slate-200 text-slate-400";
+                        optionBtn.innerHTML = `<span>${optionText}</span>`;
+                    }
+                } else {
+                    // Standard interactive style
+                    optionBtn.className += " bg-white border-slate-200 hover:border-slate-400 hover:bg-slate-50 text-slate-800 active:bg-slate-100";
+                    optionBtn.innerHTML = `<span>${optionText}</span> <span class="text-xs text-slate-400 font-mono">${String.fromCharCode(65 + i)}</span>`;
+                }
+
+                optionsContainer.appendChild(optionBtn);
+            });
+
+            const feedbackCard = document.getElementById("feedback-card");
+            if (hasAnsweredCurrent) {
+                const isUserCorrect = userAnswers[index] === qData.correctIndex;
+                
+                if (isUserCorrect) {
+                    feedbackCard.className = "border-l-4 border-emerald-500 bg-emerald-50 p-4 rounded-r-lg rounded-l-sm block";
+                    document.getElementById("feedback-title").innerText = "Rätt svar!";
+                    document.getElementById("feedback-title").className = "font-bold text-sm text-emerald-800";
+                } else {
+                    feedbackCard.className = "border-l-4 border-red-500 bg-red-50 p-4 rounded-r-lg rounded-l-sm block";
+                    document.getElementById("feedback-title").innerText = "Fel svar.";
+                    document.getElementById("feedback-title").className = "font-bold text-sm text-red-800";
+                }
+
+                document.getElementById("feedback-explanation").innerText = qData.explanation;
+            } else {
+                feedbackCard.className = "hidden";
+            }
+        }
+
+        function selectOption(selectedIndex) {
+            if (hasAnsweredCurrent) return;
+
+            const qData = questions[currentQuestionIndex];
+            userAnswers[currentQuestionIndex] = selectedIndex;
+            hasAnsweredCurrent = true;
+
+            const isCorrect = selectedIndex === qData.correctIndex;
+            if (isCorrect) {
+                score++;
+                document.getElementById("live-score").innerText = score;
+            }
+
+            // Instantly render feedback and reveal visual states
+            loadQuestion(currentQuestionIndex);
+        }
+
+        function nextQuestion() {
+            if (!hasAnsweredCurrent) return;
+
+            if (currentQuestionIndex < questions.length - 1) {
+                loadQuestion(currentQuestionIndex + 1);
+            } else {
+                endQuiz();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                loadQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        function endQuiz() {
+            document.getElementById("quiz-screen").classList.add("hidden");
+            document.getElementById("end-screen").classList.remove("hidden");
+
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById("final-score").innerText = score;
+            document.getElementById("percentage-text").innerText = `(${percentage}%)`;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = Array(questions.length).fill(null);
+            hasAnsweredCurrent = false;
+
+            document.getElementById("live-score").innerText = "0";
+            document.getElementById("end-screen").classList.add("hidden");
+            document.getElementById("quiz-screen").classList.remove("hidden");
+            
+            loadQuestion(0);
+        }
+    </script>
+</body>
+</html>
