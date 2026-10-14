@@ -1,0 +1,343 @@
+<title>Flexbox del C</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: en smal läskolumn med tre delar (utmaningar, bygg själv, quiz); utmaningarna har mål och lekplats sida vid sida. */
+:root {
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --fg: #142033;
+  --muted: #56627a;
+  --line: #d6ddea;
+  --accent: #2b50d6;
+  --accent-ink: #ffffff;
+  --main: #e0582b;   /* main axis */
+  --cross: #138a83;  /* cross axis */
+  --box: #b9dcf3;
+  --box-ink: #0d2a40;
+  --ghost: #e7edf6;
+  --ok: #1d7a43;
+  --ok-bg: #e2f4e8;
+  --bad: #b3261e;
+  --bad-bg: #fbe6e4;
+  --code-bg: #eef2f9;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1522; --surface: #172033; --fg: #e6ebf5; --muted: #9aa6bd; --line: #2b3750;
+    --accent: #7d9bff; --accent-ink: #0f1522; --main: #ff8a5c; --cross: #3fc7bd;
+    --box: #2f6f9a; --box-ink: #eaf5ff; --ghost: #1e2a40;
+    --ok: #6fd896; --ok-bg: #183526; --bad: #ff8f86; --bad-bg: #3a1d1c; --code-bg: #121a2a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1522; --surface: #172033; --fg: #e6ebf5; --muted: #9aa6bd; --line: #2b3750;
+  --accent: #7d9bff; --accent-ink: #0f1522; --main: #ff8a5c; --cross: #3fc7bd;
+  --box: #2f6f9a; --box-ink: #eaf5ff; --ghost: #1e2a40;
+  --ok: #6fd896; --ok-bg: #183526; --bad: #ff8f86; --bad-bg: #3a1d1c; --code-bg: #121a2a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--body); font-size: 17px; line-height: 1.55;
+}
+.wrap {
+  max-width: 1000px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 80px;
+}
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 3.4vw, 2rem); font-weight: 800; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+p { margin: 0; }
+code, pre, textarea { font-family: var(--mono); }
+code { background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 4px; font-size: 0.88em; }
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Header */
+.eyebrow { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 700; }
+header.top { display: grid; gap: 14px; margin-bottom: 28px; }
+.lead { max-width: 64ch; color: var(--muted); font-size: 1.05rem; }
+.props { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.props code { background: var(--surface); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; font-size: 0.85rem; }
+.toc { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 0; padding: 0; list-style: none; }
+.toc a {
+  display: inline-flex; gap: 8px; align-items: baseline; text-decoration: none; color: var(--fg);
+  border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: 8px; font-weight: 700;
+}
+.toc a span { color: var(--muted); font-weight: 400; font-size: 0.88rem; }
+.toc a:hover { border-color: var(--accent); }
+
+section.part { margin-top: 56px; display: grid; gap: 18px; scroll-margin-top: 16px; }
+.part-head { display: grid; gap: 8px; border-top: 3px solid var(--fg); padding-top: 14px; }
+.part-head .eyebrow { color: var(--accent); }
+
+/* Axes explainer */
+.axes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.axis-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; }
+.axis-card svg { width: 100%; height: auto; max-width: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.9rem; color: var(--muted); }
+.legend b.m { color: var(--main); } .legend b.c { color: var(--cross); }
+
+/* Progress */
+.progress { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: 700; }
+.bar { flex: 1 1 200px; height: 10px; background: var(--ghost); border-radius: 999px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .3s; }
+
+/* Challenge */
+.challenge { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 14px; }
+.challenge.done { border-color: var(--ok); }
+.ch-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.ch-num { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.status { margin-left: auto; font-size: 0.85rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--ghost); color: var(--muted); }
+.status.ok { background: var(--ok-bg); color: var(--ok); }
+.ch-task { max-width: 70ch; }
+.stage { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 720px) { .stage { grid-template-columns: 1fr; } }
+.pane { display: grid; gap: 6px; min-width: 0; }
+.pane-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--muted); }
+.frame {
+  height: 240px; border: 2px solid var(--fg); position: relative; overflow: hidden;
+  font-family: var(--body);
+}
+.frame.target { border-style: dashed; border-color: var(--muted); }
+.b {
+  font-size: 1.25rem; line-height: 1.6; padding: 0 0.65em; font-weight: 700;
+  border: 2px solid var(--box-ink); background: var(--box); color: var(--box-ink);
+  font-family: var(--mono);
+}
+.frame.target .b { background: var(--ghost); border-style: dashed; border-color: var(--muted); color: var(--muted); }
+.editor { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--code-bg); }
+.editor .sel { font-family: var(--mono); font-size: 0.92rem; padding: 8px 12px 0; color: var(--muted); }
+.editor textarea {
+  width: 100%; min-height: 96px; resize: vertical; border: 0; background: transparent; color: var(--fg);
+  font-size: 0.95rem; line-height: 1.6; padding: 4px 12px 4px 30px; outline: none;
+}
+.editor textarea:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.axis-read { font-size: 0.85rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; min-height: 1.4em; }
+.axis-read .m { color: var(--main); font-weight: 700; } .axis-read .c { color: var(--cross); font-weight: 700; }
+.ch-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+button {
+  font: inherit; font-weight: 700; font-size: 0.92rem; cursor: pointer;
+  border-radius: 8px; padding: 8px 14px; border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+}
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.hint { background: var(--code-bg); border-left: 3px solid var(--cross); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 0.95rem; }
+
+/* Build task */
+.req { display: grid; gap: 12px; padding: 0; margin: 0; list-style: none; counter-reset: req; }
+.req li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 14px 52px; position: relative; counter-increment: req; }
+.req li::before {
+  content: counter(req); position: absolute; left: 14px; top: 13px; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--fg); color: var(--bg); font-weight: 700; font-size: 0.85rem; display: grid; place-items: center; font-family: var(--mono);
+}
+.req li strong { display: block; font-family: var(--display); font-size: 1.05rem; }
+.codebox { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; min-width: 0; }
+.codebox-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--code-bg); }
+.codebox-head span { font-family: var(--mono); font-size: 0.85rem; font-weight: 600; }
+.codebox pre { margin: 0; padding: 14px; overflow-x: auto; font-size: 0.85rem; line-height: 1.55; }
+.files { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 820px) { .files { grid-template-columns: 1fr; } }
+
+/* Mini preview of build goal (scoped) */
+.goal { border: 2px dashed var(--muted); border-radius: 10px; overflow: hidden; background: #ffffff; color: #1a1a1a; font-family: Arial, sans-serif; font-size: 14px; }
+.goal .g-meny { display: flex; justify-content: space-between; align-items: center; background: #2d3e50; color: #fff; padding: 10px 14px; }
+.goal .g-logga { font-weight: bold; font-size: 18px; }
+.goal .g-lankar { display: flex; justify-content: space-evenly; width: 220px; max-width: 60%; }
+.goal .g-lankar span { color: #fff; text-decoration: underline; }
+.goal .g-hero { height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #f1c40f; }
+.goal .g-hero b { font-size: 22px; }
+.goal .g-kort { height: 130px; display: flex; justify-content: space-around; align-items: flex-end; background: #ecf0f1; padding-bottom: 6px; }
+.goal .g-ruta { background: #3498db; color: #fff; padding: 10px; width: 25%; text-align: center; }
+.goal .g-side { display: flex; flex-direction: column-reverse; background: #dfe6e9; padding: 6px 14px; }
+.goal .g-side span { padding: 3px 0; }
+
+/* Quiz */
+.quiz-score { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-weight: 700; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 12px; }
+.q-top { display: flex; gap: 10px; align-items: baseline; }
+.q-top .ch-num { flex: none; }
+.q pre { margin: 0; background: var(--code-bg); padding: 10px 12px; border-radius: 8px; overflow-x: auto; font-size: 0.86rem; }
+.opts { display: grid; gap: 8px; }
+.opt {
+  text-align: left; font-weight: 400; font-size: 0.98rem; display: flex; gap: 10px; align-items: baseline; padding: 10px 12px;
+}
+.opt .k { font-family: var(--mono); font-weight: 600; color: var(--muted); flex: none; }
+.opt.right { background: var(--ok-bg); border-color: var(--ok); color: var(--fg); }
+.opt.wrong { background: var(--bad-bg); border-color: var(--bad); color: var(--fg); }
+.opt:disabled { cursor: default; }
+.explain { font-size: 0.95rem; padding: 10px 14px; border-radius: 8px; background: var(--code-bg); }
+.explain b.ok { color: var(--ok); } .explain b.bad { color: var(--bad); }
+.result { background: var(--fg); color: var(--bg); border-radius: 12px; padding: 20px; display: grid; gap: 8px; }
+.result h3 { font-size: 1.5rem; }
+.result button { justify-self: start; }
+
+footer { margin-top: 60px; color: var(--muted); font-size: 0.9rem; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Quiz</h1>
+    <p class="lead">Testa att du förstått begreppen. Du ser direkt om du svarat rätt och får en förklaring.</p>
+    <div class="props" aria-label="Det här övar du på">
+      <code>display: flex</code><code>flex-direction</code><code>main axis</code><code>cross axis</code><code>justify-content</code><code>align-items</code>
+    </div>
+  </header>
+
+  <section class="part first" id="del-c" aria-labelledby="h-c">
+    <div class="part-head">
+            <h2 id="h-c">Quiz</h2>
+      <p class="lead">Välj ett svar per fråga. Du ser direkt om det var rätt och får en förklaring.</p>
+    </div>
+    <div class="quiz-score"><span id="quiz-text">0 av 0 rätt</span><div class="bar" aria-hidden="true"><i id="quiz-bar"></i></div></div>
+    <div id="quiz" style="display:grid;gap:16px"></div>
+    <div class="result" id="quiz-result" hidden>
+      <h3 id="quiz-result-title"></h3>
+      <p id="quiz-result-text"></p>
+      <button type="button" id="quiz-reset">Gör om quizet</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+
+  /* ---------- Del C ---------- */
+  var quiz = [
+    { q: "Vilken CSS-rad gör ett element till en flexbehållare?",
+      o: ["display: block;", "display: flex;", "flex-direction: row;", "position: flex;"], a: 1,
+      e: "display: flex gör elementet till en flexbehållare. Alla dess barn blir då flexelement." },
+    { q: "Var skriver du display: flex om du vill att fem boxar ska läggas på rad?",
+      o: ["På varje box", "På behållaren (föräldern) som boxarna ligger i", "På body", "På den första boxen"], a: 1,
+      e: "display: flex sätts på behållaren. Det är behållarens barn som blir flexelement och ordnas." },
+    { q: "Vilka element blir flexelement när du ger en behållare display: flex?",
+      o: ["Bara div-element", "Bara element med klassen .box", "Alla direkta barn till behållaren, oavsett om de är div, li eller p", "Alla element på hela sidan"], a: 2,
+      e: "Alla barn till behållaren blir automatiskt flexelement, vilken tagg de än har." },
+    { q: "Vilket är standardvärdet för flex-direction?",
+      o: ["column", "row", "row-reverse", "wrap"], a: 1,
+      e: "row är standard. Elementen läggs i skrivriktningen, på svenska från vänster till höger." },
+    { code: "#container {\n  display: flex;\n  flex-direction: row-reverse;\n}",
+      q: "Fem boxar (1–5) ligger i behållaren. Var hamnar box 1?",
+      o: ["Längst till vänster", "Längst till höger", "Överst", "Längst ner"], a: 1,
+      e: "row-reverse vänder raden. Main axis går från höger till vänster, så box 1 hamnar längst till höger." },
+    { q: "Vilken box hamnar överst med flex-direction: column-reverse?",
+      o: ["Box 1", "Box 3", "Box 5", "Ingen, de läggs på en rad"], a: 2,
+      e: "column-reverse staplar elementen nerifrån och upp. Box 1 hamnar längst ner och box 5 överst." },
+    { q: "Hur går main axis när flex-direction är column?",
+      o: ["Vågrätt, från vänster till höger", "Lodrätt, uppifrån och ned", "Diagonalt", "Det finns ingen main axis i en kolumn"], a: 1,
+      e: "Main axis följer flex-direction. Med column går den lodrätt, och cross axis går då vågrätt." },
+    { q: "Längs vilken axel justerar justify-content elementen?",
+      o: ["Main axis", "Cross axis", "Alltid vågrätt", "Alltid lodrätt"], a: 0,
+      e: "justify-content justerar längs main axis. Om det blir vågrätt eller lodrätt beror på flex-direction." },
+    { q: "Längs vilken axel justerar align-items elementen?",
+      o: ["Main axis", "Cross axis", "Alltid vågrätt", "Båda axlarna samtidigt"], a: 1,
+      e: "align-items justerar längs cross axis, alltså vinkelrätt mot main axis." },
+    { code: "#container {\n  display: flex;\n  flex-direction: column;\n}",
+      q: "Du vill centrera boxarna vågrätt i den här kolumnen. Vilken rad lägger du till?",
+      o: ["justify-content: center;", "align-items: center;", "text-align: center;", "flex-direction: center;"], a: 1,
+      e: "Med column går cross axis vågrätt. Därför är det align-items: center som centrerar vågrätt här." },
+    { q: "Vad gör justify-content: space-between?",
+      o: ["Lika mycket utrymme runt varje element, halvt vid kanterna", "Inget utrymme vid kanterna, lika mycket mellan elementen", "Lika mycket utrymme överallt, även vid kanterna", "Samlar elementen i mitten"], a: 1,
+      e: "space-between lägger första och sista elementet mot kanterna och fördelar resten av utrymmet jämnt mellan elementen." },
+    { q: "Vad är skillnaden mellan space-around och space-evenly?",
+      o: ["Ingen skillnad", "space-around ger halva avståndet vid kanterna, space-evenly ger lika stort avstånd överallt", "space-evenly fungerar bara i kolumner", "space-around lägger elementen mot kanterna"], a: 1,
+      e: "space-around ger varje element lika mycket utrymme runt sig, så kanterna får halva avståndet. space-evenly gör alla mellanrum lika stora." },
+    { q: "Vilket är standardvärdet för align-items?",
+      o: ["flex-start", "center", "stretch", "baseline"], a: 2,
+      e: "stretch är standard. Elementen sträcks ut längs cross axis så att de fyller behållaren." },
+    { code: "#container {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}",
+      q: "Behållaren är 300px hög. Var hamnar boxarna?",
+      o: ["Uppe till vänster", "Mitt i behållaren, både vågrätt och lodrätt", "Centrerade vågrätt men högst upp", "Under varandra i mitten"], a: 1,
+      e: "justify-content centrerar längs main axis (vågrätt) och align-items längs cross axis (lodrätt). Tillsammans hamnar boxarna mitt i. Det var svårt att göra innan flexbox!" }
+  ];
+
+  var qHost = document.getElementById("quiz");
+  var answered = {};
+  var keys = ["A", "B", "C", "D"];
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function shuffleArray(items) {
+    var arr = items.slice();
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+    return arr;
+  }
+  function updateQuiz() {
+    var n = Object.keys(answered).length;
+    var right = Object.keys(answered).filter(function (k) { return answered[k]; }).length;
+    document.getElementById("quiz-text").textContent = right + " av " + quiz.length + " rätt (" + n + " besvarade)";
+    document.getElementById("quiz-bar").style.width = (100 * right / quiz.length) + "%";
+    var res = document.getElementById("quiz-result");
+    if (n === quiz.length) {
+      res.hidden = false;
+      document.getElementById("quiz-result-title").textContent = right + " av " + quiz.length + " rätt";
+      document.getElementById("quiz-result-text").textContent =
+        right >= 13 ? "Mycket bra! Du har koll på axlarna och egenskaperna." :
+        right >= 9 ? "Bra jobbat. Läs förklaringarna på frågorna du missade och testa dem i Del A." :
+        "Gå tillbaka till bilderna om main axis och cross axis och gör utmaningarna i Del A en gång till. Gör sedan om quizet.";
+    } else res.hidden = true;
+  }
+  function renderQuiz() {
+    qHost.innerHTML = ""; answered = {};
+    quiz.forEach(function (item, i) {
+      var el = document.createElement("article");
+      el.className = "q";
+      el.innerHTML = '<div class="q-top"><span class="ch-num">' + String(i + 1).padStart(2, "0") + '</span><h3>' + esc(item.q) + "</h3></div>" +
+        (item.code ? "<pre><code>" + esc(item.code) + "</code></pre>" : "") +
+        '<div class="opts" role="group" aria-label="Svarsalternativ"></div><p class="explain" hidden></p>';
+      var opts = el.querySelector(".opts");
+      var choices = shuffleArray(item.o.map(function (txt, idx) {
+        return { text: txt, correct: idx === item.a };
+      }));
+      var correctIndex = choices.findIndex(function (opt) { return opt.correct; });
+      choices.forEach(function (choice, j) {
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "opt";
+        b.innerHTML = '<span class="k">' + keys[j] + "</span><span>" + esc(choice.text) + "</span>";
+        b.addEventListener("click", function () {
+          var right = choice.correct;
+          answered[i] = right;
+          Array.prototype.forEach.call(opts.children, function (x, k) {
+            x.disabled = true;
+            if (k === correctIndex) x.classList.add("right");
+            else if (k === j) x.classList.add("wrong");
+          });
+          var ex = el.querySelector(".explain");
+          ex.innerHTML = (right ? '<b class="ok">Rätt!</b> ' : '<b class="bad">Inte riktigt.</b> ') + esc(item.e);
+          ex.hidden = false;
+          updateQuiz();
+        });
+        opts.appendChild(b);
+      });
+      qHost.appendChild(el);
+    });
+    updateQuiz();
+  }
+  document.getElementById("quiz-reset").addEventListener("click", function () {
+    renderQuiz(); document.getElementById("del-c").scrollIntoView({ behavior: "smooth" });
+  });
+  renderQuiz();
+})();
+</script>
