@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syntax-test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .quiz-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .progress {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .question {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            white-space: pre-line;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1em;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
+        .primary-btn {
+            background-color: #007BFF;
+            color: white;
+            flex: 2;
+        }
+        .primary-btn:hover {
+            background-color: #0056b3;
+        }
+        .secondary-btn {
+            background-color: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        .secondary-btn:hover {
+            background-color: #5a6268;
+        }
+        .feedback {
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+            margin-top: 10px;
+        }
+        .feedback.correct {
+            display: block;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.wrong {
+            display: block;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .feedback.give-up {
+            display: block;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .clue {
+            font-weight: normal;
+            font-style: italic;
+            margin-top: 5px;
+            display: block;
+        }
+        .revealed-syntax {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #000;
+            display: inline-block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container" id="quiz-box">
+        <div class="progress" id="progress">Fråga 1</div>
+        <div class="question" id="question-text">Laddar fråga...</div>
+        
+        <input type="text" id="answer-input" autocomplete="off" placeholder="Skriv den exakta syntaxen här..." autofocus>
+        
+        <div class="btn-container">
+            <button id="submit-btn" class="primary-btn">Kontrollera svar</button>
+            <button id="giveup-btn" class="secondary-btn">Visa svaret</button>
+        </div>
+        
+        <div id="feedback-box" class="feedback"></div>
+    </div>
+
+    <script>
+        let quizData = [
+            {
+                question: "Ange koden som saknas i följande kodrad.\n\n<iframe src=\"video.html\" _______=\"Demovideo\"></iframe>",
+                correctAnswer: "title",
+                clue: "Detta attribut används för att ge en beskrivning av iframen."
+            },
+            {
+                question: "Ange koden som saknas i följande kodrad. \n\n<iframe src=\"video.html\" title=\"Demovideo\" _______=\"allow-scripts\"></iframe>",
+                correctAnswer: "sandbox",
+                clue: "Detta attribut används för att begränsa vad iframen får göra."
+            },
+            {
+                question: "Ange koden som saknas i följande kodrad. \n\n<iframe _________=\"video.html\" title=\"Demovideo\" sandbox=\"allow-scripts\"></iframe> ",
+                correctAnswer: "src",
+                clue: "Detta attribut används för att ange URL:en till den sida som ska visas i iframen."
+            },
+            {
+                question: "Ange koden som saknas i följande kodrad. \n\n<iframe src=\"video.html\" title=\"Demovideo\">___________",
+                correctAnswer: "</iframe>",
+                clue: "Tänk på att iframen är ett element som måste stängas med en sluttagg."
+            },
+            {
+                question: "Vilket värde på sandboxen tillåter att skript kan köras i iframen?",
+                correctAnswer: "allow-scripts",
+                clue: "Glöm ej bindestrecken mellan orden i värdet."
+            },
+            {
+                question: "Vilket värde på sandboxen tillåter iframen att få åtkomst till cookies och lokade storage från samma domän?",
+                correctAnswer: "allow-same-origin",
+                clue: "Glöm ej bindestrecken mellan orden i värdet."
+            },
+            {
+                question: "Vilket värde på sandboxen tillåter att skript kan köras i iframen?",
+                correctAnswer: "allow-scripts",
+                clue: "Glöm ej bindestrecken mellan orden i värdet."
+            },
+            {
+                question: "Vilket värde på sandboxen tillåter öppning av nya fönster eller flikar från iframen?",
+                correctAnswer: "allow-popups",
+                clue: "Glöm ej bindestrecken mellan orden i värdet."
+            },
+            {
+                question: "Vilket element används till att bädda in externa webbsidor i en HTML-sida?",
+                correctAnswer: "<iframe>",
+                clue: "Detta element används för att bädda in en annan webbsida i den nuvarande."
+            },
+            {
+                question: "Ange koden som saknas för att vi ska kunna bädda in youtubeklippet https://youtube.com/embed/test där skärmläsaren kan läsa upp \"Test klipp från youtube\"? \n\n<iframe ___________________________________________________></iframe>",
+                correctAnswer: "src=\"https://youtube.com/embed/test\" title=\"Test klipp från youtube\"",
+                clue: "Tänk på vilka två attribut som alltid måste vara med."
+            },
+            {
+                question: "Vilket värde på sandboxen tillåter att iframen kan öppna dialogrutor och i värsta fall överbelasta servern genom att skicka in för många blockeringar?",
+                correctAnswer: "allow-modals",
+                clue: "Glöm ej bindestrecken mellan orden i värdet."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let totalQuestionsAnsweredCorrectly = 0; // Håller koll på hur många unika som är avklarade om du vill bygga ut räknare
+
+        const progressEl = document.getElementById("progress");
+        const questionEl = document.getElementById("question-text");
+        const inputEl = document.getElementById("answer-input");
+        const feedbackEl = document.getElementById("feedback-box");
+        const submitBtn = document.getElementById("submit-btn");
+        const giveupBtn = document.getElementById("giveup-btn");
+
+        function loadQuestion() {
+            if (currentQuestionIndex < quizData.length) {
+                // Återställ input, knappar och feedback
+                inputEl.value = "";
+                inputEl.disabled = false;
+                
+                submitBtn.textContent = "Kontrollera svar";
+                submitBtn.removeEventListener("click", nextQuestion);
+                submitBtn.addEventListener("click", checkAnswer);
+                
+                giveupBtn.style.display = "block"; 
+                
+                feedbackEl.className = "feedback";
+                feedbackEl.innerHTML = "";
+                
+                // Uppdatera text (Visar nuvarande position i kön)
+                progressEl.textContent = `Fråga ${currentQuestionIndex + 1} i kön (Totalt kvar: ${quizData.length - currentQuestionIndex})`;
+                questionEl.textContent = quizData[currentQuestionIndex].question;
+                inputEl.focus();
+            } else {
+                // Om listan är helt tom / slut
+                document.getElementById("quiz-box").innerHTML = "<h2>Snyggt jobbat!</h2><p>Du har tagit dig igenom och svarat rätt på alla frågor!</p>";
+            }
+        }
+
+        function checkAnswer() {
+            const userAnswer = inputEl.value;
+            const currentQuestion = quizData[currentQuestionIndex];
+
+            if (userAnswer === currentQuestion.correctAnswer) {
+                // RÄTT SVAR
+                feedbackEl.className = "feedback correct";
+                feedbackEl.innerHTML = "Helt rätt! Bra gjort.";
+                inputEl.disabled = true;
+                giveupBtn.style.display = "none";
+                
+                submitBtn.textContent = "Nästa fråga";
+                submitBtn.removeEventListener("click", checkAnswer);
+                submitBtn.addEventListener("click", nextQuestion);
+            } else {
+                // FEL SVAR - Flytta frågan till slutet av listan
+                feedbackEl.className = "feedback wrong";
+                feedbackEl.innerHTML = `Tyvärr inte helt rätt. <span class="clue"><strong>Tips:</strong> ${currentQuestion.clue}</span><br><small style="font-weight:normal; color:#888;">Frågan har flyttats till slutet av testet så du får försöka igen senare.</small>`;
+                
+                // Kopiera och tryck in sist i arrayen
+                quizData.push({ ...currentQuestion });
+            }
+        }
+
+        function revealAnswer() {
+            const currentQuestion = quizData[currentQuestionIndex];
+            feedbackEl.className = "feedback give-up";
+            feedbackEl.innerHTML = `Rätt svar är:<br><span class="revealed-syntax">${escapeHtml(currentQuestion.correctAnswer)}</span>`;
+            
+            // Lås inputfältet så de inte behöver skriva
+            inputEl.disabled = true;
+            giveupBtn.style.display = "none";
+            
+            // Förvandla kontrollknappen till "Nästa fråga"
+            submitBtn.textContent = "Nästa fråga";
+            submitBtn.removeEventListener("click", revealAnswer);
+            submitBtn.removeEventListener("click", checkAnswer);
+            submitBtn.addEventListener("click", nextQuestion);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Initiera knapparna med event listeners
+        submitBtn.addEventListener("click", checkAnswer);
+        giveupBtn.addEventListener("click", revealAnswer);
+
+        // Enter fungerar både för att kontrollera och för att gå vidare
+        window.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                submitBtn.click();
+            }
+        });
+
+        loadQuestion();
+    </script>
+</body>
+</html>

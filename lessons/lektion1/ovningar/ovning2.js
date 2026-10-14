@@ -34,9 +34,7 @@ var parsonsPuzzle = new ParsonsWidget({
     "x_indent": 50,
     "lang": "en",
     "show_feedback": true,
-    "python3": true,
-    "trash_label": "Dra från detta block",
-    "solution_label": "Konstruera din lösning här"
+    "python3": true
 });
 parsonsPuzzle.init(initial);
 parsonsPuzzle.shuffleLines();
