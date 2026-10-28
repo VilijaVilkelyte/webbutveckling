@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS-repetition – 10 övningar</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<noscript><div class="js-error" style="display:block">Den här sidan behöver JavaScript för att fungera. Slå på JavaScript i webbläsaren.</div></noscript>
+<div class="js-error" id="jsError" role="alert"></div>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">Webbutveckling 1<small>CSS · Repetition lektion 1–3</small></div>
+    <button class="btn" id="themeBtn" type="button" aria-label="Byt färgtema">◐ Tema: Auto</button>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <h1>CSS-repetition: 10 övningar</h1>
+  <p>Här repeterar du allt vi gått igenom hittills. De flesta övningar är praktiska: du skriver CSS i kodrutan, ser resultatet direkt och trycker på <strong>Kontrollera</strong> för att se om du klarat alla krav.</p>
+  <p>Dina framsteg och din kod sparas i webbläsaren, så du kan fortsätta senare.</p>
+  <ul class="lessons">
+    <li>Lektion 1: CSS-grunder, text och enheter</li>
+    <li>Lektion 2: Selektorer, regelordning och boxmodellen</li>
+    <li>Lektion 3: Flexbox och responsiva bilder</li>
+  </ul>
+</div>
+
+<nav class="progress" aria-label="Framsteg">
+  <div class="wrap">
+    <span class="count" id="count">0 / 10 klara</span>
+    <div class="bar" aria-hidden="true"><span id="barFill"></span></div>
+    <div class="jump" id="jump"></div>
+  </div>
+</nav>
+
+<main class="wrap" id="exercises"></main>
+
+<footer class="page">
+  <div class="wrap">
+    <span>Tips: Fastnar du? Öppna <em>Ledtråd</em> innan du tittar på lösningsförslaget.</span>
+    <button class="btn" id="resetAll" type="button">Nollställ alla framsteg</button>
+  </div>
+</footer>
+
+<script>
+/* Visar ett tydligt felmeddelande på sidan om något går fel */
+function visaFel(msg) {
+  var box = document.getElementById('jsError');
+  if (!box) return;
+  box.style.display = 'block';
+  box.textContent = 'Något gick fel när sidan laddades: ' + msg + '. Kontrollera att index.html och style.css ligger i samma mapp och prova att ladda om sidan.';
+}
+window.addEventListener('error', function (e) { visaFel(e.message || 'okänt fel'); });
+/* =========================================================
+   INSTÄLLNINGAR FÖR LÄRAREN
+   VISA_FACIT = false döljer alla lösningsförslag.
+   ========================================================= */
+const VISA_FACIT = true;
+const STORE_KEY = 'css-repetition-wu1-v1';
+
+/* Grundstil som alla förhandsvisningar får (eleverna ser den inte) */
+const BASE_CSS = `body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:16px;color:#222;background:#fff;line-height:1.45}`;
+
+/* En stor bild som används i övning 10 (inbyggd, ingen extern fil) */
+const BIG_IMG = 'data:image/svg+xml,' + encodeURIComponent(
+`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="300" viewBox="0 0 900 300"><rect width="900" height="300" fill="#4c6ef5"/><circle cx="160" cy="150" r="90" fill="#ffd43b"/><rect x="330" y="80" width="460" height="40" rx="8" fill="#fff" opacity=".9"/><rect x="330" y="140" width="380" height="24" rx="6" fill="#fff" opacity=".6"/><rect x="330" y="180" width="300" height="24" rx="6" fill="#fff" opacity=".6"/><text x="450" y="280" font-family="Arial" font-size="22" fill="#fff" text-anchor="middle">Bilden är 900 px bred<\/text><\/svg>`);
+
+/* =========================================================
+   ÖVNINGARNA
+   ========================================================= */
+const EXERCISES = [
+
+/* ---------- 1 ---------- */
+{
+  title: 'Laga den trasiga CSS-koden',
+  tags: ['Lektion 1', 'CSS-syntax', 'Tre sätt att lägga till CSS'],
+  intro: `<p>En klasskamrat har skrivit CSS, men ingenting fungerar som det ska. Hitta och rätta felen. Titta extra noga på klamrar <code>{ }<\/code>, kolon <code>:<\/code> och semikolon <code>;<\/code>.<\/p>`,
+  parts: [
+    {
+      type: 'code', title: 'Del A: Hitta syntaxfelen',
+      html: `<h1>Min rubrik<\/h1>\n<p>Välkommen till min första webbsida med CSS!<\/p>`,
+      start: `h1 \n  color: blue\n  font-size: 30px;\n}\n\np {\n  color green;\n  font-size: 18px\n  background-color: lightyellow;\n}`,
+      solution: `h1 {\n  color: blue;\n  font-size: 30px;\n}\n\np {\n  color: green;\n  font-size: 18px;\n  background-color: lightyellow;\n}`,
+      height: 190,
+      checks: [
+        ['Rubriken (<code>h1<\/code>) är blå', c => c.same(c.st('h1').color, 'blue')],
+        ['Rubriken har storleken 30px', c => c.st('h1').fontSize === '30px'],
+        ['Stycket (<code>p<\/code>) är grönt', c => c.same(c.st('p').color, 'green')],
+        ['Stycket har storleken 18px', c => c.st('p').fontSize === '18px'],
+        ['Stycket har bakgrundsfärgen lightyellow', c => c.same(c.st('p').backgroundColor, 'lightyellow')],
+      ],
+      hint: `Det finns fyra fel. Ett av dem gör att <em>båda<\/em> reglerna slutar fungera. Varje regel behöver <code>selektor { egenskap: värde; }<\/code>.`
+    },
+    {
+      type: 'choice', title: 'Del B: Begreppen',
+      items: [
+        { q: 'I regeln <code>h1 { color: blue; }<\/code>: vad kallas <code>h1<\/code>?', options: ['Egenskap', 'Selektor', 'Deklarationsblock', 'Värde'], answer: 1, why: 'Selektorn väljer vilka element regeln gäller.' },
+        { q: 'Vad kallas allt mellan klamrarna <code>{ color: blue; }<\/code>?', options: ['Selektor', 'Deklarationsblock', 'Attribut', 'Style-element'], answer: 1, why: 'Deklarationsblocket innehåller en eller flera deklarationer (egenskap: värde;).' },
+        { q: 'Vilket av de tre sätten att lägga till CSS ska du normalt använda?', options: ['Inline (style-attributet)', 'style-elementet i head', 'En extern .css-fil'], answer: 2, why: 'En extern fil håller isär innehåll och utseende och kan användas av alla sidor på webbplatsen.' },
+        { q: 'Var i HTML-dokumentet lägger du <code>&lt;link&gt;<\/code>-taggen som hämtar CSS-filen?', options: ['I head', 'Först i body', 'Sist i body', 'Var som helst'], answer: 0, why: 'link-elementet hör hemma i head.' },
+      ]
+    },
+    {
+      type: 'text', title: 'Del C: Skriv link-taggen',
+      items: [
+        {
+          q: 'Din CSS ligger i filen <code>stil.css<\/code> i samma mapp som HTML-filen. Skriv hela <code>&lt;link&gt;<\/code>-taggen som kopplar in den:',
+          placeholder: '<link ...>',
+          test: s => {
+            const t = s.trim().replace(/\s+/g, ' ').replace(/'/g, '"').toLowerCase();
+            return /^<link (rel="stylesheet" href="(\.\/)?stil\.css"|href="(\.\/)?stil\.css" rel="stylesheet") ?\/?>$/.test(t);
+          },
+          solution: '<link rel="stylesheet" href="stil.css">'
+        }
+      ]
+    }
+  ]
+},
+
+/* ---------- 2 ---------- */
+{
+  title: 'Kopiera designen: färg och text',
+  tags: ['Lektion 1', 'Färger', 'Textstyling', 'em'],
+  intro: `<p>Styla kortet så att det ser ut som målbilden. Använd <strong>exakt<\/strong> de värden som står i kraven.<\/p>`,
+  parts: [
+    {
+      type: 'code', title: 'Gör kortet likt målbilden', target: true, showHtml: true,
+      html: `<div class="kort">\n  <h2>Kanelbullens dag<\/h2>\n  <p class="ingress">Den 4 oktober firar vi Sveriges godaste bulle.<\/p>\n  <p class="brod">\n    Kanelbullens dag instiftades 1999 för att fira den svenska\n    bakkonsten. Varje år säljs miljontals bullar runt om i landet,\n    och många bakar dessutom egna hemma i köket tillsammans\n    med familj och vänner.\n  <\/p>\n  <p class="pris">Pris: 25 kr<\/p>\n<\/div>`,
+      base: `.kort{max-width:420px;padding:18px 22px;border:1px solid #ddd;border-radius:10px} .kort p{margin:.5em 0}`,
+      start: `/* Skriv din CSS här */\n\n.kort {\n  \n}\n`,
+      solution: `.kort {\n  background-color: rgba(255, 87, 51, 0.15);\n}\n\nh2 {\n  color: #1E3A5F;\n  font-family: Georgia, serif;\n  text-align: center;\n}\n\n.ingress {\n  font-style: italic;\n  font-weight: 600;\n}\n\n.brod {\n  text-align: justify;\n}\n\n.pris {\n  font-size: 1.5em;\n}`,
+      height: 330,
+      checks: [
+        ['Rubriken har hex-färgen <code>#1E3A5F<\/code>', c => c.same(c.st('h2').color, '#1E3A5F')],
+        ['Rubriken har typsnittet Georgia, med det generella typsnittet <code>serif<\/code> sist som reserv', c => { const f = c.st('h2').fontFamily.replace(/["']/g, '').toLowerCase().split(',').map(s => s.trim()); return f[0] === 'georgia' && f[f.length - 1] === 'serif'; }],
+        ['Rubriken är centrerad', c => c.st('h2').textAlign === 'center'],
+        ['Kortet (<code>.kort<\/code>) har bakgrunden <code>rgba(255, 87, 51, 0.15)<\/code>', c => c.same(c.st('.kort').backgroundColor, 'rgba(255, 87, 51, 0.15)')],
+        ['Ingressen är kursiv och har tjockleken 600', c => c.st('.ingress').fontStyle === 'italic' && ['600', 'semibold'].includes(c.st('.ingress').fontWeight)],
+        ['Brödtexten (<code>.brod<\/code>) är justerad med <code>justify<\/code>', c => c.st('.brod').textAlign === 'justify'],
+        ['Priset är 1,5 gånger så stort som förälderns text, angivet i <code>em<\/code>', c => /\.pris\{[^}]*font-size:1\.5em/.test(c.src) && Math.abs(parseFloat(c.st('.pris').fontSize) - 1.5 * parseFloat(c.st('.kort').fontSize)) < 0.5],
+      ],
+      hint: `Egenskaper du behöver: <code>color<\/code>, <code>font-family<\/code>, <code>text-align<\/code>, <code>background-color<\/code>, <code>font-style<\/code>, <code>font-weight<\/code> och <code>font-size<\/code>. Klassselektorer skrivs med punkt, till exempel <code>.ingress<\/code>.`
+    }
+  ]
+},
+
+/* ---------- 3 ---------- */
+{
+  title: 'Välj rätt enhet',
+  tags: ['Lektion 1', 'Absoluta och relativa enheter'],
+  intro: `<p>Som fyrhörnsövningen från lektionen. Vilken enhet passar bäst i varje situation? Sedan använder du enheterna i kod.<\/p>`,
+  parts: [
+    {
+      type: 'choice', title: 'Del A: Vilken enhet?',
+      items: [
+        { q: 'En logga ska vara exakt 180 pixlar bred på alla skärmar.', options: ['px', '%', 'em', 'rem', 'vw', 'vh'], answer: 0, why: 'px är en absolut enhet och ändras inte.' },
+        { q: 'En sidopanel ska alltid vara en tredjedel så bred som lådan den ligger i.', options: ['px', '%', 'em', 'rem', 'vw', 'vh'], answer: 1, why: '% räknas från föräldraelementet.' },
+        { q: 'En startbild (hero) ska alltid fylla hela fönstrets höjd.', options: ['px', '%', 'em', 'rem', 'vw', 'vh'], answer: 5, why: '100vh = hela fönstrets höjd.' },
+        { q: 'Alla underrubriker ska vara 1,5 gånger rotelementets (<code>&lt;html&gt;<\/code>) textstorlek, oavsett var de ligger.', options: ['px', '%', 'em', 'rem', 'vw', 'vh'], answer: 3, why: 'rem = root em, räknas alltid från html-elementet.' },
+        { q: 'Avståndet runt texten i en knapp ska växa när knappens egen textstorlek blir större.', options: ['px', '%', 'em', 'rem', 'vw', 'vh'], answer: 2, why: 'em räknas från elementets egen textstorlek.' },
+        { q: 'Ett element ska vara lika brett som fönstret, även om det ligger i en smal förälder.', options: ['px', '%', 'em', 'rem', 'vw', 'vh'], answer: 4, why: 'vw räknas från fönstrets bredd, inte förälderns.' },
+      ]
+    },
+    {
+      type: 'code', title: 'Del B: Använd enheterna',
+      html: `<div class="banner">Banner<\/div>\n<div class="lada">\n  <div class="ruta">Ruta<\/div>\n<\/div>\n<div class="sektion">\n  <p class="under">Underrubrik<\/p>\n<\/div>`,
+      base: `body{margin:0;padding:0 12px}.banner{background:#4dabf7;color:#fff;font-weight:bold;padding:0 10px}.lada{width:320px;border:2px dashed #555;margin:10px 0}.ruta{background:#ffd43b;height:36px;padding:0 8px}.sektion{font-size:20px}.under{margin:6px 0;font-weight:bold}`,
+      start: `.banner {\n  \n}\n\n.ruta {\n  \n}\n\n.under {\n  \n}\n`,
+      solution: `.banner {\n  height: 50vh;\n}\n\n.ruta {\n  width: 50%;\n}\n\n.under {\n  font-size: 1.5rem;\n}`,
+      height: 320,
+      measure: c => `Fönster: ${c.w.innerHeight}px högt · Banner: ${Math.round(c.r('.banner').height)}px hög · Ruta: ${Math.round(c.r('.ruta').width)}px av lådans ${Math.round(c.r('.lada').width - 4)}px · Underrubrik: ${c.st('.under').fontSize}`,
+      checks: [
+        ['<code>.banner<\/code> fyller alltid halva fönstrets höjd', c => /\.banner\{[^}]*height:50vh/.test(c.src) && Math.abs(c.r('.banner').height - c.w.innerHeight / 2) < 2],
+        ['<code>.ruta<\/code> är alltid hälften så bred som <code>.lada<\/code> den ligger i', c => /\.ruta\{[^}]*width:50%/.test(c.src)],
+        ['<code>.under<\/code> är 1,5 gånger rotelementets textstorlek (förälderns storlek ska inte spela roll)', c => /\.under\{[^}]*font-size:1\.5rem/.test(c.src) && c.st('.under').fontSize === '24px'],
+      ],
+      hint: `Föräldern <code>.sektion<\/code> har textstorleken 20px. Testa både <code>1.5em<\/code> och <code>1.5rem<\/code> på <code>.under<\/code> och jämför storleken under förhandsvisningen.`
+    }
+  ]
+},
+
+/* ---------- 4 ---------- */
+{
+  title: 'Selektorer i tech-bloggen',
+  tags: ['Lektion 2', 'Element-, kombinations- och gruppselektor', 'id och klass'],
+  intro: `<p>Skriv CSS som träffar <strong>exakt<\/strong> rätt element. Kontrollen ser också till att du inte råkar färga element som inte ska färgas.<\/p>`,
+  parts: [
+    {
+      type: 'code', title: 'Styla bloggen', showHtml: true,
+      html: `<header>\n  <h1>Min Tech-Blogg<\/h1>\n  <p>Senaste nytt inom teknik<\/p>\n<\/header>\n<section>\n  <article id="highlight">\n    <h3>Nytt AI-genombrott<\/h3>\n    <p>Forskare har tränat en modell som kan förutsäga vädret. <span class="tagg">AI<\/span><\/p>\n    <a href="#">Läs mer<\/a>\n  <\/article>\n  <article class="recension">\n    <h3>Recension: ny mobil<\/h3>\n    <p>Batteriet håller i två dagar. <span class="tagg">Mobil<\/span><\/p>\n    <a href="#">Läs mer<\/a>\n  <\/article>\n<\/section>\n<footer>\n  <p>© 2026 Min Tech-Blogg<\/p>\n<\/footer>`,
+      base: `article{padding:6px 12px;margin:8px 0;border:1px solid #ddd;border-radius:6px} h1{margin:.2em 0} .tagg{padding:0 6px;border-radius:4px;font-size:.85em}`,
+      start: `/* a) */\n\n/* b) */\n\n/* c) */\n\n/* d) */\n\n/* e) */\n\n/* f) */\n`,
+      solution: `/* a) */\nh3 { color: crimson; }\n\n/* b) */\nheader p { color: gray; }\n\n/* c) */\nh1, footer p { color: navy; }\n\n/* d) */\n#highlight { background-color: lightyellow; }\n\n/* e) */\n.tagg { background-color: lavender; }\n\n/* f) */\n.recension a { color: green; }`,
+      height: 400,
+      checks: [
+        ['a) Alla <code>h3<\/code>-rubriker är <code>crimson<\/code>', c => c.all('h3').every(e => c.same(c.w.getComputedStyle(e).color, 'crimson'))],
+        ['b) <em>Bara<\/em> stycket i <code>header<\/code> är <code>gray<\/code> (inte styckena i artiklarna)', c => c.same(c.st('header p').color, 'gray') && !c.all('article p').some(e => c.same(c.w.getComputedStyle(e).color, 'gray'))],
+        ['c) <code>h1<\/code> och stycket i <code>footer<\/code> är <code>navy<\/code>, skrivet med <em>en<\/em> gruppselektor', c => c.same(c.st('h1').color, 'navy') && c.same(c.st('footer p').color, 'navy') && /(^|\})(h1,footer p|footer p,h1)\{/.test(c.src)],
+        ['d) Artikeln med id <code>highlight<\/code> har bakgrunden <code>lightyellow<\/code>', c => c.same(c.st('#highlight').backgroundColor, 'lightyellow') && !c.same(c.st('.recension').backgroundColor, 'lightyellow')],
+        ['e) <em>Alla<\/em> element med klassen <code>tagg<\/code> har bakgrunden <code>lavender<\/code>', c => c.all('.tagg').every(e => c.same(c.w.getComputedStyle(e).backgroundColor, 'lavender'))],
+        ['f) <em>Bara<\/em> länken i artikeln med klassen <code>recension<\/code> är <code>green<\/code>', c => c.same(c.st('.recension a').color, 'green') && !c.same(c.st('#highlight a').color, 'green')],
+      ],
+      hint: `Kom ihåg: <code>#<\/code> före id, <code>.<\/code> före klass. Mellanslag betyder ”inuti”, komma betyder ”och även”.`
+    }
+  ]
+},
+
+/* ---------- 5 ---------- */
+{
+  title: 'Selektorjakten',
+  tags: ['Lektion 2', 'Selektorer', 'HTML-trädet'],
+  intro: `<p>Här tränar du att <em>läsa<\/em> och <em>skriva<\/em> selektorer. Utgå från HTML-koden nedan (samma som miniövning 2).<\/p>`,
+  parts: [
+    {
+      type: 'click', title: 'Del A: Klicka på alla element som selektorn träffar',
+      html: `<h1>Välkommen!<\/h1>\n<div id="intro">\n  <p class="special"><strong>Stark text<\/strong><\/p>\n<\/div>\n<div id="main">\n  <h2>Rubrik 1<\/h2>\n  <p>Paragraf<\/p>\n  <h2>Rubrik 2<\/h2>\n  <p class="special"><strong>Extra stark<\/strong><\/p>\n<\/div>\n<p>Avslutande paragraf<\/p>`,
+      rounds: ['.special', '#main p', 'div strong', 'h1, #main h2', '#intro .special strong']
+    },
+    {
+      type: 'selector', title: 'Del B: Skriv selektorn själv',
+      lead: 'Skriv en selektor som träffar <em>exakt<\/em> de element som beskrivs, varken fler eller färre. Försök hålla den så kort som möjligt. Elementen som din selektor träffar markeras i trädet medan du skriver.',
+      html: `<h1>Välkommen!<\/h1>\n<div id="intro">\n  <p class="special"><strong>Stark text<\/strong><\/p>\n<\/div>\n<div id="main">\n  <h2>Rubrik 1<\/h2>\n  <p>Paragraf<\/p>\n  <h2>Rubrik 2<\/h2>\n  <p class="special"><strong>Extra stark<\/strong><\/p>\n<\/div>\n<p>Avslutande paragraf<\/p>`,
+      items: [
+        { q: 'Båda <code>strong<\/code>-elementen', target: 'strong', solution: 'strong' },
+        { q: 'Bara <code>strong<\/code>-elementet i main-diven', target: '#main strong', solution: '#main strong' },
+        { q: 'Alla p-element som ligger inuti en div', target: 'div p', solution: 'div p' },
+        { q: 'h1 och båda h2-rubrikerna', target: 'h1, h2', solution: 'h1, h2' },
+      ]
+    }
+  ]
+},
+
+/* ---------- 6 ---------- */
+{
+  title: 'Specificitetsduellen',
+  tags: ['Lektion 2', 'Kaskaden', 'Specificitet', 'Sist vinner'],
+  intro: `<p>När två regler krockar avgörs det i ordningen <strong>källa → specificitet → regelordning<\/strong>. Räkna rutorna [ID] [klass] [element].<\/p>`,
+  parts: [
+    {
+      type: 'numeric', title: 'Del A: Räkna rutorna',
+      items: [
+        { q: '<code>#meny a<\/code>', answer: [1, 0, 1], labels: ['ID', 'Klass', 'Element'] },
+        { q: '<code>nav ul li a<\/code>', answer: [0, 0, 4], labels: ['ID', 'Klass', 'Element'] },
+        { q: '<code>.aktiv<\/code>', answer: [0, 1, 0], labels: ['ID', 'Klass', 'Element'] },
+        { q: '<code>a.aktiv<\/code>', answer: [0, 1, 1], labels: ['ID', 'Klass', 'Element'] },
+        { q: '<code>#meny .aktiv<\/code>', answer: [1, 1, 0], labels: ['ID', 'Klass', 'Element'] },
+        { q: '<code>header nav .lank.aktiv<\/code>', answer: [0, 2, 2], labels: ['ID', 'Klass', 'Element'] },
+      ]
+    },
+    {
+      type: 'choice', title: 'Del B: Vilken färg blir texten?',
+      lead: 'HTML-koden är i alla fall: <code>&lt;div class="ruta"&gt;&lt;p id="info" class="notis"&gt;Vilken färg?&lt;/p&gt;&lt;/div&gt;<\/code>',
+      items: [
+        { code: `p { color: red; }\n.notis { color: blue; }\ndiv p { color: green; }`, q: 'Vilken färg får texten?', options: ['red', 'blue', 'green'], answer: 1, why: '.notis = 0 1 0 slår div p = 0 0 2. Klass slår element, oavsett hur många element.' },
+        { code: `p.notis { color: orange; }\n.ruta p { color: purple; }`, q: 'Vilken färg får texten?', options: ['orange', 'purple'], answer: 1, why: 'Båda är 0 1 1. Lika specificitet: den sista regeln vinner.' },
+        { code: `#info { color: teal; }\n.ruta .notis { color: hotpink; }`, q: 'Vilken färg får texten?', options: ['teal', 'hotpink'], answer: 0, why: '#info = 1 0 0 slår .ruta .notis = 0 2 0. Jämför ruta för ruta från vänster: första rutan som skiljer avgör.' },
+        { code: `#info { color: teal; }\np { color: gray !important; }`, q: 'Vilken färg får texten?', options: ['teal', 'gray'], answer: 1, why: '!important vinner över allt. Använd det bara i nödfall!' },
+      ]
+    }
+  ]
+},
+
+/* ---------- 7 ---------- */
+{
+  title: 'Boxmodellen: räkna och bygg',
+  tags: ['Lektion 2', 'margin', 'border', 'padding', 'content'],
+  intro: `<p>Lådans totala bredd = margin + border + padding + <strong>width<\/strong> + padding + border + margin.<\/p>`,
+  parts: [
+    {
+      type: 'numeric', title: 'Del A: Hur bred blir lådan totalt (inklusive margin)?',
+      items: [
+        { q: '<pre class="snippet"><code>div {\n  width: 300px;\n  padding: 15px;\n  border: 3px solid black;\n  margin: 10px;\n}<\/code><\/pre>', answer: 356, unit: 'px' },
+        { q: '<pre class="snippet"><code>p {\n  width: 120px;\n  padding: 10px 25px;\n  border: 4px solid;\n  margin: 0 8px;\n}<\/code><\/pre>', answer: 194, unit: 'px' },
+        { q: '<pre class="snippet"><code>div {\n  width: 200px;\n  padding: 0;\n  border: 1px solid;\n  margin: 10px 15px 20px 25px;\n}<\/code><\/pre>', answer: 242, unit: 'px' },
+        { q: 'Lådan ska ta <strong>exakt 500 px<\/strong> totalt. Vilken <code>width<\/code> ska du sätta?<pre class="snippet"><code>div {\n  width: ???;\n  padding: 30px;\n  border: 2px solid;\n  margin: 20px;\n}<\/code><\/pre>', answer: 396, unit: 'px' },
+      ]
+    },
+    {
+      type: 'code', title: 'Del B: Bygg ett tech-kort med exakta mått',
+      html: `<div class="kort">\n  <h3>Nytt AI-genombrott<\/h3>\n  <p>Forskare har tränat en modell som kan förutsäga vädret tio dagar framåt.<\/p>\n<\/div>`,
+      base: `body{margin:0;background:#f1f3f5} .kort{background:#fff} .kort h3{margin:0 0 6px} .kort p{margin:0}`,
+      start: `.kort {\n  \n}\n`,
+      solution: `.kort {\n  width: 272px;   /* 320 - 2*20 - 2*4 */\n  padding: 20px;\n  border: 4px dashed teal;\n  margin: 16px;\n}`,
+      height: 230,
+      measure: c => { const s = c.st('.kort'); return `Kortets bredd med border och padding: ${Math.round(c.r('.kort').width * 10) / 10}px · padding: ${s.paddingTop} · border: ${s.borderTopWidth} ${s.borderTopStyle} · margin: ${s.marginTop}`; },
+      checks: [
+        ['Kortet har <code>padding<\/code> 20px på alla sidor', c => { const s = c.st('.kort'); return ['Top', 'Right', 'Bottom', 'Left'].every(k => s['padding' + k] === '20px'); }],
+        ['Kortet har en streckad (<code>dashed<\/code>) ram som är 4px bred, i valfri färg', c => { const s = c.st('.kort'); return ['Top', 'Right', 'Bottom', 'Left'].every(k => s['border' + k + 'Style'] === 'dashed' && s['border' + k + 'Width'] === '4px'); }],
+        ['Kortet har 16px <code>margin<\/code> på alla sidor', c => { const s = c.st('.kort'); return ['Top', 'Right', 'Bottom', 'Left'].every(k => s['margin' + k] === '16px'); }],
+        ['Kortet är <strong>exakt 320px<\/strong> brett räknat med border och padding (utan margin). Räkna ut vilken <code>width<\/code> som behövs!', c => Math.abs(c.r('.kort').width - 320) < 0.5],
+      ],
+      hint: `320 px ska rymma vänster border + vänster padding + width + höger padding + höger border.`
+    }
+  ]
+},
+
+/* ---------- 8 ---------- */
+{
+  title: 'Flexbox-banan',
+  tags: ['Lektion 3', 'display: flex', 'justify-content', 'align-items', 'flex-wrap', 'flex'],
+  intro: `<p>Fem nivåer i stil med Flexbox Froggy. Skriv CSS så att din förhandsvisning ser ut som målbilden. Kom ihåg: <code>justify-content<\/code> styr längs <strong>main axis<\/strong>, <code>align-items<\/code> längs <strong>cross axis<\/strong>.<\/p>`,
+  parts: [
+    {
+      type: 'code', title: 'Nivå 1: Fördela boxarna', target: true,
+      html: `<div id="container">\n  <div class="box">1<\/div>\n  <div class="box">2<\/div>\n  <div class="box">3<\/div>\n<\/div>`,
+      base: `#container{border:2px dashed #888;background:#f8f9fa;padding:0}.box{width:60px;height:60px;font:bold 1.6rem/60px Arial;text-align:center;border:2px solid #000;background:lightblue}`,
+      start: `#container {\n  \n}\n`,
+      solution: `#container {\n  display: flex;\n  justify-content: space-between;\n}`,
+      height: 120,
+      checks: [
+        ['<code>#container<\/code> är en flexbehållare', c => c.st('#container').display === 'flex'],
+        ['Boxarna ligger på rad med lika stort mellanrum, och första och sista boxen ligger mot kanterna', c => c.st('#container').justifyContent === 'space-between'],
+      ],
+      hint: `Titta på de sex värdena för <code>justify-content<\/code>: flex-start, flex-end, center, space-between, space-around, space-evenly.`
+    },
+    {
+      type: 'code', title: 'Nivå 2: Mitt i prick', target: true,
+      html: `<div id="container">\n  <div class="box">1<\/div>\n  <div class="box">2<\/div>\n  <div class="box">3<\/div>\n<\/div>`,
+      base: `#container{border:2px dashed #888;background:#f8f9fa;height:170px}.box{width:60px;height:60px;font:bold 1.6rem/60px Arial;text-align:center;border:2px solid #000;background:lightblue}`,
+      start: `#container {\n  \n}\n`,
+      solution: `#container {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}`,
+      height: 210,
+      checks: [
+        ['<code>#container<\/code> är en flexbehållare', c => c.st('#container').display === 'flex'],
+        ['Boxarna är centrerade vågrätt (längs main axis)', c => c.st('#container').justifyContent === 'center'],
+        ['Boxarna är centrerade lodrätt (längs cross axis)', c => c.st('#container').alignItems === 'center'],
+      ]
+    },
+    {
+      type: 'code', title: 'Nivå 3: Byt riktning', target: true,
+      html: `<div id="container">\n  <div class="box">1<\/div>\n  <div class="box">2<\/div>\n  <div class="box">3<\/div>\n<\/div>`,
+      base: `#container{border:2px dashed #888;background:#f8f9fa}.box{width:60px;height:40px;font:bold 1.3rem/40px Arial;text-align:center;border:2px solid #000;background:lightblue}`,
+      start: `#container {\n  display: flex;\n  \n}\n`,
+      solution: `#container {\n  display: flex;\n  flex-direction: column;\n  align-items: flex-end;\n}`,
+      height: 190,
+      checks: [
+        ['Boxarna staplas lodrätt uppifrån och ner (1, 2, 3)', c => c.st('#container').flexDirection === 'column'],
+        ['Boxarna ligger längs <strong>högra<\/strong> kanten. Tänk på vilken axel som är cross axis nu!', c => ['flex-end', 'end'].includes(c.st('#container').alignItems)],
+      ],
+      hint: `När <code>flex-direction<\/code> är <code>column<\/code> går main axis lodrätt och cross axis vågrätt. Vilken egenskap styr cross axis?`
+    },
+    {
+      type: 'code', title: 'Nivå 4: Radbrytning', target: true,
+      html: `<div id="container">\n  <div class="box">1<\/div>\n  <div class="box">2<\/div>\n  <div class="box">3<\/div>\n  <div class="box">4<\/div>\n  <div class="box">5<\/div>\n  <div class="box">6<\/div>\n  <div class="box">7<\/div>\n<\/div>`,
+      base: `#container{border:2px dashed #888;background:#f8f9fa;width:440px;max-width:100%;height:260px}.box{width:120px;height:50px;font:bold 1.3rem/50px Arial;text-align:center;border:2px solid #000;background:lightblue}`,
+      start: `#container {\n  display: flex;\n  \n}\n`,
+      solution: `#container {\n  display: flex;\n  flex-wrap: wrap;\n  justify-content: center;\n  align-content: space-between;\n}`,
+      height: 300,
+      checks: [
+        ['Boxarna trängs inte ihop utan bryts ner på nya rader', c => c.st('#container').flexWrap === 'wrap'],
+        ['Varje rad är centrerad vågrätt', c => c.st('#container').justifyContent === 'center'],
+        ['Första raden ligger högst upp, sista raden längst ner och mellanraden mitt emellan', c => c.st('#container').alignContent === 'space-between'],
+      ],
+      hint: `När boxarna ligger på flera rader styr <code>align-content<\/code> hur <em>raderna<\/em> fördelas i höjdled.`
+    },
+    {
+      type: 'code', title: 'Nivå 5: Dubbelt så bred', target: true,
+      html: `<div id="container">\n  <div class="box" id="box1">1<\/div>\n  <div class="box" id="box2">2<\/div>\n  <div class="box" id="box3">3<\/div>\n<\/div>`,
+      base: `#container{border:2px dashed #888;background:#f8f9fa;display:flex}.box{height:60px;font:bold 1.6rem/60px Arial;text-align:center;border:2px solid #000;background:lightblue}`,
+      start: `.box {\n  \n}\n\n#box2 {\n  \n}\n`,
+      solution: `.box {\n  flex: 1 1;\n}\n\n#box2 {\n  flex: 2 1;\n}`,
+      height: 110,
+      checks: [
+        ['Boxarna växer och fyller tillsammans hela raden', c => { const tot = c.all('.box').reduce((s, e) => s + e.getBoundingClientRect().width, 0); return Math.abs(tot - c.q('#container').clientWidth) < 2; }],
+        ['Box 1 och 3 har <code>flex-grow<\/code> 1', c => c.st('#box1').flexGrow === '1' && c.st('#box3').flexGrow === '1'],
+        ['Box 2 har <code>flex-grow<\/code> 2 och blir därför bredast', c => c.st('#box2').flexGrow === '2'],
+      ],
+      hint: `<code>flex: flex-grow flex-shrink flex-basis;<\/code>. Ge alla boxar <code>flex: 1 1;<\/code> och ge box 2 ett större flex-grow.`
+    }
+  ]
+},
+
+/* ---------- 9 ---------- */
+{
+  title: 'Bygg navigationsmenyn',
+  tags: ['Lektion 3', 'Flexbox', 'margin: auto', 'Lektion 1', 'Text'],
+  intro: `<p>Bygg menyn från lektionen steg för steg, men nu med en twist: loggan ska ligga längst till vänster, <strong>Kontakt ensam längst till höger<\/strong> och övriga länkar i mitten.<\/p>`,
+  parts: [
+    {
+      type: 'code', title: 'Menyn', wide: true, minWidth: 760, target: true, showHtml: true,
+      html: `<ul>\n  <li class="logo">LOGO<\/li>\n  <li>Om oss<\/li>\n  <li>Blogg<\/li>\n  <li id="butik">Butik<\/li>\n  <li id="kontakt">Kontakt<\/li>\n<\/ul>`,
+      base: `body{margin:12px}`,
+      start: `ul {\n  \n}\n\nli {\n  \n}\n`,
+      solution: `ul {\n  background-color: lightblue;\n  list-style: none;\n  font-family: Arial, sans-serif;\n  font-weight: bold;\n  display: flex;\n  align-items: center;\n  padding: 10px;\n}\n\nli {\n  margin: 10px;\n}\n\n.logo,\n#butik {\n  margin-right: auto;\n}`,
+      height: 130,
+      checks: [
+        ['Listan har en bakgrundsfärg och inga punkter (<code>list-style<\/code>)', c => c.st('ul').listStyleType === 'none' && !c.same(c.st('ul').backgroundColor, 'transparent')],
+        ['Texten är fet och har typsnittet Arial (med reservtypsnitt)', c => ['700', 'bold'].includes(c.st('ul').fontWeight) && /^"?arial/i.test(c.st('ul').fontFamily)],
+        ['Listan är en flexbehållare där punkterna är centrerade lodrätt och har 10px padding', c => { const s = c.st('ul'); return s.display === 'flex' && s.alignItems === 'center' && ['Top', 'Right', 'Bottom', 'Left'].every(k => s['padding' + k] === '10px'); }],
+        ['Varje <code>li<\/code> har 10px margin uppåt, nedåt och till vänster', c => c.all('li').every(e => { const s = c.w.getComputedStyle(e); return s.marginTop === '10px' && s.marginBottom === '10px' && s.marginLeft === '10px'; })],
+        ['Loggan ligger längst till vänster och Kontakt längst till höger', c => { const u = c.r('ul'); return c.r('.logo').left - u.left < 30 && u.right - c.r('#kontakt').right < 30; }],
+        ['Det finns ett tydligt luftigt mellanrum både efter loggan och före Kontakt', c => { const lis = c.all('li').map(e => e.getBoundingClientRect()); return lis[1].left - lis[0].right > 40 && lis[4].left - lis[3].right > 40; }],
+      ],
+      hint: `<code>margin-right: auto<\/code> tar allt ledigt utrymme till höger om elementet. Vad händer om <em>två<\/em> element har det? Butik har id <code>butik<\/code>.`
+    }
+  ]
+},
+
+/* ---------- 10 ---------- */
+{
+  title: 'Slutprojekt: Klubbsida med tre kolumner',
+  tags: ['Alla lektioner', 'Flexbox-layout', 'Boxmodellen', 'Responsiva bilder', 'rem'],
+  intro: `<p>Nu kombinerar du allt. Bygg layouten <strong>nav, tre kolumner (aside, main, aside) och footer<\/strong>. Testa gärna att göra webbläsarfönstret smalare och se hur sidan anpassar sig.<\/p>`,
+  parts: [
+    {
+      type: 'code', title: 'Robotklubbens sida', wide: true, minWidth: 760, target: true, showHtml: true,
+      html: `<nav>\n  <span class="logo">Robotklubben<\/span>\n  <a href="#">Hem<\/a>\n  <a href="#">Schema<\/a>\n  <a href="#">Kontakt<\/a>\n<\/nav>\n<div class="wrapper">\n  <aside class="vanster">\n    <h3>Nyheter<\/h3>\n    <p>Ny lödstation på plats!<\/p>\n  <\/aside>\n  <main>\n    <h1>Veckans bygge<\/h1>\n    <img src="robot.svg" alt="Illustration av veckans bygge">\n    <p>Den här veckan bygger vi en linjeföljande robot med två motorer och en ljussensor.<\/p>\n  <\/main>\n  <aside class="hoger">\n    <h3>Träffar<\/h3>\n    <p>Tisdagar 16–18 i sal B12.<\/p>\n  <\/aside>\n<\/div>\n<footer>© 2026 Robotklubben<\/footer>`,
+      base: `body{margin:0} nav{background:#212529;color:#fff;padding:12px 16px} nav a{color:#ffd43b;margin-left:16px} .logo{font-weight:bold} aside{background:#e7f5ff} main{background:#fff} footer{background:#212529;color:#fff;padding:12px} h1,h3{margin-top:0}`,
+      start: `nav {\n  \n}\n\n.logo {\n  \n}\n\n.wrapper {\n  \n}\n\naside {\n  \n}\n\nmain {\n  \n}\n\nimg {\n  \n}\n\nfooter {\n  \n}\n`,
+      solution: `nav {\n  display: flex;\n  align-items: center;\n}\n\n.logo {\n  margin-right: auto;\n}\n\n.wrapper {\n  display: flex;\n}\n\naside, main {\n  padding: 1rem;\n  border: 1px solid #adb5bd;\n}\n\naside {\n  flex: 1 1;\n}\n\nmain {\n  flex: 2 1;\n}\n\nimg {\n  max-width: 100%;\n  height: auto;\n}\n\nfooter {\n  text-align: center;\n  font-size: 0.875rem;\n}`,
+      height: 470,
+      checks: [
+        ['<code>nav<\/code> är en flexbehållare där loggan ligger till vänster och länkarna längst till höger', c => { const n = c.r('nav'); const links = c.all('nav a'); const last = links[links.length - 1].getBoundingClientRect(); return c.st('nav').display === 'flex' && n.right - last.right < 30 && links[0].getBoundingClientRect().left - c.r('.logo').right > 40; }],
+        ['Kolumnerna i <code>.wrapper<\/code> ligger bredvid varandra', c => c.st('.wrapper').display === 'flex' && Math.abs(c.r('.vanster').top - c.r('main').top) < 2 && Math.abs(c.r('main').top - c.r('.hoger').top) < 2],
+        ['<code>main<\/code> växer dubbelt så mycket som varje <code>aside<\/code> (flex-grow 2 mot 1)', c => c.st('main').flexGrow === '2' && c.st('.vanster').flexGrow === '1' && c.st('.hoger').flexGrow === '1'],
+        ['Alla tre kolumner har padding <code>1rem<\/code> och en 1px heldragen (<code>solid<\/code>) ram', c => ['.vanster', 'main', '.hoger'].every(s => { const x = c.st(s); return x.paddingTop === '16px' && x.paddingLeft === '16px' && x.borderTopStyle === 'solid' && x.borderTopWidth === '1px'; })],
+        ['Bilden blir aldrig bredare än <code>main<\/code> (responsiv bild)', c => c.r('img').width <= c.q('main').clientWidth - 31 && /img\{[^}]*max-width:100%/.test(c.src)],
+        ['Footern har centrerad text och textstorleken <code>0.875rem<\/code>', c => c.st('footer').textAlign === 'center' && c.st('footer').fontSize === '14px' && /footer\{[^}]*font-size:0?\.875rem/.test(c.src)],
+      ],
+      hint: `En bild blir responsiv med <code>max-width: 100%;<\/code> (och gärna <code>height: auto;<\/code> så att proportionerna behålls). Du kan skriva en gemensam regel för flera element med en gruppselektor: <code>aside, main { ... }<\/code>.`
+    }
+  ]
+}
+];
+
+/* =========================================================
+   MOTOR (behöver normalt inte ändras)
+   ========================================================= */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const normCss = css => css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ').replace(/\s*([{}:;,>])\s*/g, '$1').toLowerCase().trim();
+
+let state = { done: {}, css: {}, theme: 'auto' };
+try { const s = JSON.parse(localStorage.getItem(STORE_KEY)); if (s && typeof s === 'object') state = Object.assign(state, s); } catch (e) {}
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+/* ---------- Tema ---------- */
+const themeBtn = $('#themeBtn');
+const THEMES = ['auto', 'light', 'dark'], THEME_NAMES = { auto: 'Auto', light: 'Ljust', dark: 'Mörkt' };
+function applyTheme() {
+  if (state.theme === 'auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', state.theme);
+  themeBtn.textContent = '◐ Tema: ' + THEME_NAMES[state.theme];
+}
+themeBtn.addEventListener('click', () => { state.theme = THEMES[(THEMES.indexOf(state.theme) + 1) % 3]; applyTheme(); save(); });
+applyTheme();
+
+/* ---------- Framsteg ---------- */
+function partIds(i) { return EXERCISES[i].parts.map((_, j) => `e${i}p${j}`); }
+function exDone(i) { return partIds(i).every(id => state.done[id]); }
+function markPart(pid, ok) {
+  if (ok) state.done[pid] = true;
+  save();
+  const el = document.querySelector(`[data-pid="${pid}"]`);
+  if (el) el.classList.toggle('done', !!state.done[pid]);
+  refreshProgress();
+}
+function refreshProgress() {
+  let n = 0;
+  EXERCISES.forEach((_, i) => {
+    const d = exDone(i); if (d) n++;
+    $(`#ex${i + 1}`).classList.toggle('done', d);
+    $(`#jump a[href="#ex${i + 1}"]`).classList.toggle('done', d);
+  });
+  $('#count').textContent = `${n} / ${EXERCISES.length} klara`;
+  $('#barFill').style.width = (n / EXERCISES.length * 100) + '%';
+}
+
+/* ---------- Förhandsvisning ----------
+   Rättningen körs INNE i förhandsvisningen och svaret skickas tillbaka
+   med postMessage. Då fungerar sidan även när den är inbäddad på en
+   annan webbplats (t.ex. i en lärplattform) eller öppnas direkt från disk. */
+function frameAgent() {
+  function normCss(css) { return css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ').replace(/\s*([{}:;,>])\s*/g, '$1').toLowerCase().trim(); }
+  function makeCtx(css) {
+    var d = document, w = window;
+    var q = function (s) { var e = d.querySelector(s); if (!e) throw new Error('saknas'); return e; };
+    var col = function (v) { var t = d.createElement('i'); t.style.color = v; d.body.appendChild(t); var r = w.getComputedStyle(t).color; t.remove(); return r; };
+    return {
+      d: d, w: w, q: q,
+      all: function (s) { return Array.prototype.slice.call(d.querySelectorAll(s)); },
+      st: function (s) { return w.getComputedStyle(q(s)); },
+      r: function (s) { return q(s).getBoundingClientRect(); },
+      same: function (a, b) { return col(a) === col(b); },
+      src: normCss(css)
+    };
+  }
+  function run(src, c) { return (new Function('return ' + src))()(c); }
+  window.addEventListener('message', function (e) {
+    var m = e.data;
+    if (!m || m.cssrep !== 1 || e.source !== parent) return;
+    var st = document.getElementById('elev');
+    if (typeof m.css === 'string' && st) st.textContent = m.css;
+    /* Körs direkt (inte i requestAnimationFrame): webbläsare pausar
+       animationsrutor i inbäddade rutor som ligger utanför skärmen.
+       getComputedStyle/getBoundingClientRect räknar ändå om stilen. */
+    var c = makeCtx(m.css || ''), res = [], meas = '';
+    var root = document.documentElement;
+    /* Layoutkontroller mäts med en minsta bredd så att rätt kod godkänns även på smala skärmar */
+    if (m.checks && m.checks.length && m.minWidth) root.style.minWidth = m.minWidth + 'px';
+    (m.checks || []).forEach(function (src) { var r = false; try { r = !!run(src, c); } catch (err) { r = false; } res.push(r); });
+    root.style.minWidth = '';
+    if (m.measure) { try { meas = String(run(m.measure, c)); } catch (err) { meas = ''; } }
+    parent.postMessage({ cssrep: 1, id: m.id, res: res, measure: meas }, '*');
+  });
+}
+const FRAME_SCRIPT = '<script>(' + frameAgent.toString() + ')();<\/script>';
+
+function frameDoc(part, css, withAgent) {
+  const html = part.html.replace('robot.svg', BIG_IMG);
+  return `<!DOCTYPE html><html lang="sv"><head><meta charset="utf-8"><style>${BASE_CSS}${part.base || ''}<\/style><style id="elev">${css}<\/style><\/head><body>${html}${withAgent ? FRAME_SCRIPT : ''}<\/body><\/html>`;
+}
+function makeFrame(part, css, label, withAgent) {
+  const pane = document.createElement('div');
+  pane.className = 'pane';
+  pane.innerHTML = `<div class="pane-head"><span class="dots"><i><\/i><i><\/i><i><\/i><\/span>${label}<\/div>`;
+  const f = document.createElement('iframe');
+  f.className = 'frame'; f.title = label; f.style.height = (part.height || 220) + 'px';
+  f.srcdoc = frameDoc(part, css, withAgent);
+  pane.appendChild(f);
+  return { pane, frame: f };
+}
+
+/* Meddelanden till och från förhandsvisningarna */
+let msgSeq = 0;
+const pending = {};
+window.addEventListener('message', e => {
+  const m = e.data;
+  if (m && m.cssrep === 1 && m.id && pending[m.id]) { const fn = pending[m.id]; delete pending[m.id]; fn(m); }
+});
+function askFrame(frame, payload) {
+  return new Promise(resolve => {
+    const id = 'm' + (++msgSeq);
+    pending[id] = resolve;
+    try { frame.contentWindow.postMessage(Object.assign({ cssrep: 1, id }, payload), '*'); }
+    catch (e) { delete pending[id]; resolve(null); return; }
+    setTimeout(() => { if (pending[id]) { delete pending[id]; resolve(null); } }, 4000);
+  });
+}
+
+/* ---------- Del-typer ---------- */
+function helpBlocks(part) {
+  let h = '';
+  if (part.hint) h += `<details class="help"><summary>💡 Ledtråd<\/summary><p>${part.hint}<\/p><\/details>`;
+  if (VISA_FACIT && part.solution) h += `<details class="help"><summary>🔑 Visa lösningsförslag<\/summary><pre class="snippet"><code>${esc(part.solution)}<\/code><\/pre><\/details>`;
+  return h;
+}
+
+function renderCode(part, pid, box) {
+  const saved = state.css[pid] != null ? state.css[pid] : part.start;
+  box.insertAdjacentHTML('beforeend', `
+    <ol class="checks">${part.checks.map(ch => `<li><span class="dot"><\/span><span>${ch[0]}<\/span><\/li>`).join('')}<\/ol>
+    ${part.showHtml ? `<details class="html-ref"><summary>Visa HTML-koden<\/summary><pre class="snippet"><code>${esc(part.html)}<\/code><\/pre><\/details>` : ''}
+    <div class="bench${part.wide ? ' wide' : ''}">
+      <div class="pane"><div class="pane-head">style.css<\/div><textarea class="editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="CSS-kod"><\/textarea><\/div>
+      <div class="views"><\/div>
+    <\/div>
+    <div class="actions"><button class="btn primary" type="button">Kontrollera<\/button><button class="btn reset" type="button">Återställ kod<\/button><span class="feedback" role="status"><\/span><\/div>
+    ${helpBlocks(part)}`);
+  const ta = box.querySelector('textarea'), views = box.querySelector('.views');
+  ta.value = saved;
+  ta.rows = Math.max(10, saved.split('\n').length + 2);
+  const mine = makeFrame(part, saved, 'Ditt resultat', true);
+  views.appendChild(mine.pane);
+  let measureEl = null;
+  if (part.measure) { measureEl = document.createElement('div'); measureEl.className = 'measure'; mine.pane.appendChild(measureEl); }
+  if (part.target) views.appendChild(makeFrame(part, part.solution, 'Målbild', false).pane);
+
+  const checkSrc = part.checks.map(ch => ch[1].toString());
+  const measureSrc = part.measure ? part.measure.toString() : null;
+  const lis = [...box.querySelectorAll('.checks li')];
+  const fb = box.querySelector('.feedback');
+
+  /* Väntar tills förhandsvisningen har laddat */
+  let loaded = false, waiters = [];
+  mine.frame.addEventListener('load', () => { loaded = true; waiters.splice(0).forEach(fn => fn()); refresh(); });
+  const whenLoaded = () => loaded ? Promise.resolve() : new Promise(r => waiters.push(r));
+
+  /* Skickar elevens CSS till förhandsvisningen (och uppdaterar mätvärden) */
+  async function refresh() {
+    await whenLoaded();
+    const ans = await askFrame(mine.frame, { css: ta.value, checks: [], measure: measureSrc });
+    if (measureEl && ans) measureEl.textContent = ans.measure;
+  }
+
+  let t;
+  ta.addEventListener('input', () => {
+    state.css[pid] = ta.value; save();
+    clearTimeout(t);
+    t = setTimeout(refresh, 150);
+  });
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      const s = ta.selectionStart, en = ta.selectionEnd;
+      ta.value = ta.value.slice(0, s) + '  ' + ta.value.slice(en);
+      ta.selectionStart = ta.selectionEnd = s + 2;
+      ta.dispatchEvent(new Event('input'));
+    }
+  });
+  const checkBtn = box.querySelector('.btn.primary');
+  checkBtn.addEventListener('click', async () => {
+    clearTimeout(t);
+    checkBtn.disabled = true;
+    await whenLoaded();
+    const ans = await askFrame(mine.frame, { css: ta.value, checks: checkSrc, measure: measureSrc, minWidth: part.minWidth || 0 });
+    checkBtn.disabled = false;
+    if (!ans) { fb.className = 'feedback bad'; fb.textContent = 'Kontrollen fick inget svar från förhandsvisningen. Ladda om sidan och försök igen.'; return; }
+    let ok = 0;
+    ans.res.forEach((r, i) => { lis[i].classList.toggle('ok', r); lis[i].classList.toggle('fail', !r); if (r) ok++; });
+    if (measureEl) measureEl.textContent = ans.measure;
+    const all = ok === part.checks.length;
+    fb.className = 'feedback ' + (all ? 'ok' : 'bad');
+    fb.textContent = all ? 'Snyggt! Alla krav är uppfyllda. ✓' : `${ok} av ${part.checks.length} krav uppfyllda. Fortsätt!`;
+    if (all) markPart(pid, true);
+  });
+  box.querySelector('.reset').addEventListener('click', () => {
+    ta.value = part.start; delete state.css[pid]; save();
+    loaded = false;
+    mine.frame.srcdoc = frameDoc(part, part.start, true);
+    lis.forEach(l => l.classList.remove('ok', 'fail')); fb.textContent = '';
+  });
+  if (state.done[pid]) lis.forEach(l => l.classList.add('ok'));
+}
+
+function renderChoice(part, pid, box) {
+  if (part.lead) box.insertAdjacentHTML('beforeend', `<p>${part.lead}<\/p>`);
+  const solved = new Set();
+  part.items.forEach((it, k) => {
+    const q = document.createElement('div'); q.className = 'q';
+    q.innerHTML = `${it.code ? `<pre class="snippet"><code>${esc(it.code)}<\/code><\/pre>` : ''}<p>${it.q}<\/p><div class="opts">${it.options.map((o, i) => `<button type="button" class="opt" data-i="${i}">${esc(o)}<\/button>`).join('')}<\/div><div class="why" role="status"><\/div>`;
+    const why = q.querySelector('.why');
+    q.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => {
+      const i = +b.dataset.i;
+      if (i === it.answer) {
+        q.querySelectorAll('.opt').forEach(x => x.classList.remove('wrong'));
+        b.classList.add('right'); why.className = 'why ok'; why.innerHTML = 'Rätt! ' + (it.why || '');
+        solved.add(k); if (solved.size === part.items.length) markPart(pid, true);
+      } else {
+        b.classList.add('wrong'); why.className = 'why bad'; why.textContent = 'Inte riktigt, försök igen.';
+      }
+    }));
+    if (state.done[pid]) { q.querySelector(`.opt[data-i="${it.answer}"]`).classList.add('right'); why.className = 'why ok'; why.innerHTML = it.why || ''; solved.add(k); }
+    box.appendChild(q);
+  });
+}
+
+function renderNumeric(part, pid, box) {
+  const wrap = document.createElement('div');
+  part.items.forEach(it => {
+    const q = document.createElement('div'); q.className = 'q';
+    const arr = Array.isArray(it.answer);
+    const inputs = arr
+      ? it.answer.map((_, i) => `<label>${it.labels[i]} <input class="inp small" inputmode="numeric" aria-label="${it.labels[i]}"><\/label>`).join('')
+      : `<label><input class="inp" inputmode="numeric" aria-label="Svar"> ${it.unit || ''}<\/label>`;
+    q.innerHTML = arr ? `<div class="spec-grid"><div>${it.q}<\/div><div class="num-row">${inputs}<\/div><\/div>` : `<div>${it.q}<\/div><div class="num-row"><span>Svar:<\/span>${inputs}<\/div>`;
+    if (state.done[pid]) [...q.querySelectorAll('input')].forEach((inp, i) => { inp.value = arr ? it.answer[i] : it.answer; inp.classList.add('ok'); });
+    wrap.appendChild(q);
+  });
+  box.appendChild(wrap);
+  box.insertAdjacentHTML('beforeend', `<div class="actions"><button class="btn primary" type="button">Kontrollera<\/button><span class="feedback" role="status"><\/span><\/div>`);
+  const fb = box.querySelector('.feedback');
+  box.querySelector('.btn.primary').addEventListener('click', () => {
+    let right = 0;
+    [...wrap.children].forEach((q, k) => {
+      const it = part.items[k], ans = Array.isArray(it.answer) ? it.answer : [it.answer];
+      let allOk = true;
+      [...q.querySelectorAll('input')].forEach((inp, i) => {
+        const v = inp.value.trim().replace(/px$/i, '').replace(',', '.');
+        const ok = v !== '' && Number(v) === ans[i];
+        inp.classList.toggle('ok', ok); inp.classList.toggle('bad', !ok);
+        if (!ok) allOk = false;
+      });
+      if (allOk) right++;
+    });
+    const all = right === part.items.length;
+    fb.className = 'feedback ' + (all ? 'ok' : 'bad');
+    fb.textContent = all ? 'Allt rätt! ✓' : `${right} av ${part.items.length} rätt. Rätta de röda rutorna.`;
+    if (all) markPart(pid, true);
+  });
+}
+
+function renderText(part, pid, box) {
+  part.items.forEach(it => {
+    const q = document.createElement('div'); q.className = 'q';
+    q.innerHTML = `<p>${it.q}<\/p><input class="inp long" spellcheck="false" autocapitalize="off" placeholder="${esc(it.placeholder || '')}" aria-label="Svar"><div class="actions"><button class="btn primary" type="button">Kontrollera<\/button><span class="feedback" role="status"><\/span><\/div>
+      ${VISA_FACIT ? `<details class="help"><summary>🔑 Visa lösningsförslag<\/summary><pre class="snippet"><code>${esc(it.solution)}<\/code><\/pre><\/details>` : ''}`;
+    const inp = q.querySelector('input'), fb = q.querySelector('.feedback');
+    if (state.done[pid]) { inp.value = it.solution; inp.classList.add('ok'); }
+    const check = () => {
+      const ok = it.test(inp.value);
+      inp.classList.toggle('ok', ok); inp.classList.toggle('bad', !ok);
+      fb.className = 'feedback ' + (ok ? 'ok' : 'bad');
+      fb.textContent = ok ? 'Rätt! ✓' : 'Inte riktigt. Kontrollera rel, href och citattecken.';
+      if (ok) markPart(pid, true);
+    };
+    q.querySelector('.btn').addEventListener('click', check);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+    box.appendChild(q);
+  });
+}
+
+/* HTML-träd för selektorövningarna */
+function buildTree(html, container, clickable) {
+  const tpl = document.createElement('template'); tpl.innerHTML = html;
+  const frag = tpl.content, nodes = [];
+  const fmtOpen = el => `<span class="t-tag">&lt;${el.tagName.toLowerCase()}<\/span>${[...el.attributes].map(a => ` <span class="t-attr">${a.name}="${esc(a.value)}"<\/span>`).join('')}<span class="t-tag">&gt;<\/span>`;
+  const walk = (el, depth) => {
+    const pad = '  '.repeat(depth);
+    const kids = [...el.children];
+    const tag = clickable ? 'button' : 'div';
+    const b = document.createElement(tag);
+    b.className = 'node' + (clickable ? '' : ' static');
+    if (clickable) b.type = 'button';
+    nodes.push({ el, btn: b });
+    if (!kids.length) {
+      b.innerHTML = pad + fmtOpen(el) + `<span class="t-text">${esc(el.textContent.trim())}<\/span><span class="t-tag">&lt;/${el.tagName.toLowerCase()}&gt;<\/span>`;
+      container.appendChild(b);
+    } else {
+      b.innerHTML = pad + fmtOpen(el);
+      container.appendChild(b);
+      kids.forEach(k => walk(k, depth + 1));
+      const cl = document.createElement('div'); cl.className = 'closer';
+      cl.innerHTML = pad + `&lt;/${el.tagName.toLowerCase()}&gt;`; container.appendChild(cl);
+    }
+  };
+  [...frag.children].forEach(c => walk(c, 0));
+  return { frag, nodes };
+}
+
+function renderClick(part, pid, box) {
+  box.insertAdjacentHTML('beforeend', `<div class="round-head"><div>Selektor: <code class="selector-big"><\/code><\/div><span class="tag rnd"><\/span><\/div><div class="tree" role="group" aria-label="HTML-träd"><\/div><div class="actions"><button class="btn primary" type="button">Kontrollera<\/button><button class="btn next" type="button" hidden>Nästa selektor →<\/button><span class="feedback" role="status"><\/span><\/div>`);
+  const { frag, nodes } = buildTree(part.html, box.querySelector('.tree'), true);
+  let round = state.done[pid] ? part.rounds.length - 1 : 0;
+  const selEl = box.querySelector('.selector-big'), rnd = box.querySelector('.rnd'), fb = box.querySelector('.feedback'), next = box.querySelector('.next');
+  const show = () => {
+    selEl.textContent = part.rounds[round];
+    rnd.textContent = `Selektor ${round + 1} av ${part.rounds.length}`;
+    nodes.forEach(n => n.btn.classList.remove('sel', 'hit', 'miss'));
+    fb.textContent = ''; next.hidden = true;
+  };
+  nodes.forEach(n => n.btn.addEventListener('click', () => { n.btn.classList.remove('hit', 'miss'); n.btn.classList.toggle('sel'); }));
+  box.querySelector('.btn.primary').addEventListener('click', () => {
+    const target = new Set(frag.querySelectorAll(part.rounds[round]));
+    let errors = 0;
+    nodes.forEach(n => {
+      const picked = n.btn.classList.contains('sel') || n.btn.classList.contains('hit') || n.btn.classList.contains('miss');
+      const should = target.has(n.el);
+      n.btn.classList.remove('sel', 'hit', 'miss');
+      if (picked && should) n.btn.classList.add('hit');
+      else if (picked && !should) { n.btn.classList.add('miss'); errors++; }
+      else if (!picked && should) errors++;
+    });
+    if (!errors) {
+      fb.className = 'feedback ok';
+      if (round < part.rounds.length - 1) { fb.textContent = 'Rätt! ✓'; next.hidden = false; }
+      else { fb.textContent = 'Alla selektorer klara! ✓'; markPart(pid, true); }
+    } else {
+      fb.className = 'feedback bad';
+      fb.textContent = `Inte riktigt: ${errors} element är fel (rött = ska inte väljas, eller så saknas något). Klicka för att ändra och försök igen.`;
+      nodes.forEach(n => { if (n.btn.classList.contains('hit')) { n.btn.classList.remove('hit'); n.btn.classList.add('sel'); } });
+    }
+  });
+  next.addEventListener('click', () => { round++; show(); });
+  show();
+}
+
+function renderSelector(part, pid, box) {
+  if (part.lead) box.insertAdjacentHTML('beforeend', `<p>${part.lead}<\/p>`);
+  box.insertAdjacentHTML('beforeend', `<div class="two"><div class="tree" aria-label="HTML-träd"><\/div><div class="sel-items"><\/div><\/div><div class="actions"><button class="btn primary" type="button">Kontrollera<\/button><span class="feedback" role="status"><\/span><\/div>`);
+  const { frag, nodes } = buildTree(part.html, box.querySelector('.tree'), false);
+  const list = box.querySelector('.sel-items'), fb = box.querySelector('.feedback');
+  const highlight = sel => {
+    nodes.forEach(n => n.btn.classList.remove('sel'));
+    if (!sel.trim()) return;
+    try { const m = new Set(frag.querySelectorAll(sel)); nodes.forEach(n => { if (m.has(n.el)) n.btn.classList.add('sel'); }); } catch (e) {}
+  };
+  const inputs = part.items.map(it => {
+    const q = document.createElement('div'); q.className = 'q';
+    q.innerHTML = `<p>${it.q}<\/p><input class="inp long mono" spellcheck="false" autocapitalize="off" placeholder="skriv selektor…" aria-label="Selektor">`;
+    list.appendChild(q);
+    const inp = q.querySelector('input');
+    if (state.done[pid]) { inp.value = it.solution; inp.classList.add('ok'); }
+    inp.addEventListener('input', () => highlight(inp.value));
+    inp.addEventListener('focus', () => highlight(inp.value));
+    return inp;
+  });
+  box.querySelector('.btn.primary').addEventListener('click', () => {
+    let right = 0;
+    part.items.forEach((it, k) => {
+      const inp = inputs[k]; let ok = false;
+      try {
+        const got = [...frag.querySelectorAll(inp.value)], want = [...frag.querySelectorAll(it.target)];
+        ok = inp.value.trim() !== '' && got.length === want.length && got.every((e, i) => e === want[i]);
+      } catch (e) { ok = false; }
+      inp.classList.toggle('ok', ok); inp.classList.toggle('bad', !ok);
+      if (ok) right++;
+    });
+    const all = right === part.items.length;
+    fb.className = 'feedback ' + (all ? 'ok' : 'bad');
+    fb.textContent = all ? 'Alla selektorer träffar rätt! ✓' : `${right} av ${part.items.length} rätt. Klicka i en ruta för att se vad din selektor träffar.`;
+    if (all) markPart(pid, true);
+  });
+  if (VISA_FACIT) box.insertAdjacentHTML('beforeend', `<details class="help"><summary>🔑 Visa lösningsförslag<\/summary><pre class="snippet"><code>${part.items.map((it, i) => `${i + 1}. ${esc(it.solution)}`).join('\n')}<\/code><\/pre><\/details>`);
+}
+
+const RENDER = { code: renderCode, choice: renderChoice, numeric: renderNumeric, text: renderText, click: renderClick, selector: renderSelector };
+
+/* ---------- Bygg sidan ---------- */
+const main = $('#exercises'), jump = $('#jump');
+EXERCISES.forEach((ex, i) => {
+  jump.insertAdjacentHTML('beforeend', `<a href="#ex${i + 1}" title="${esc(ex.title)}">${i + 1}<\/a>`);
+  const sec = document.createElement('section');
+  sec.className = 'ex'; sec.id = `ex${i + 1}`;
+  sec.innerHTML = `<div class="ex-head"><div class="num">${i + 1}<\/div><div><h2>${ex.title}<\/h2><div class="meta">${ex.tags.map(t => `<span class="tag">${t}<\/span>`).join('')}<\/div><\/div><span class="badge">Klar ✓<\/span><\/div><div class="ex-body"><div class="intro">${ex.intro}<\/div><\/div>`;
+  const body = sec.querySelector('.ex-body');
+  ex.parts.forEach((p, j) => {
+    const pid = `e${i}p${j}`;
+    const box = document.createElement('div');
+    box.className = 'part' + (state.done[pid] ? ' done' : '');
+    box.dataset.pid = pid;
+    box.innerHTML = `<p class="part-title">${p.title || ''}<span class="pdone">Klar ✓<\/span><\/p>`;
+    try { RENDER[p.type](p, pid, box); }
+    catch (e) { box.insertAdjacentHTML('beforeend', '<p class="feedback bad">Den här delen kunde inte laddas: ' + esc(e.message) + '<\/p>'); visaFel(e.message); }
+    body.appendChild(box);
+  });
+  main.appendChild(sec);
+});
+refreshProgress();
+
+$('#resetAll').addEventListener('click', () => {
+  let ok = true; try { ok = confirm('Vill du nollställa alla framsteg och all kod du skrivit?'); } catch (e) { ok = true; }
+  if (!ok) return;
+  state.done = {}; state.css = {}; save(); location.reload();
+});
+</script>
+</body>
+</html>
