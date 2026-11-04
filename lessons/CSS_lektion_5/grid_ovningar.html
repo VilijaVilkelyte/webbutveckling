@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS Grid övningar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root {
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --fg: #142033;
+  --muted: #56627a;
+  --line: #d6ddea;
+  --accent: #2b50d6;
+  --accent-ink: #ffffff;
+  --gl: #d23b3b;       /* grid-linjer */
+  --cross: #138a83;
+  --box: #b9dcf3;
+  --box-ink: #0d2a40;
+  --box2: #ffd59e;
+  --box2-ink: #4a2a00;
+  --ghost: #e7edf6;
+  --ok: #1d7a43;
+  --ok-bg: #e2f4e8;
+  --warn: #8a5a00;
+  --warn-bg: #fdf0d5;
+  --code-bg: #eef2f9;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1522; --surface: #172033; --fg: #e6ebf5; --muted: #9aa6bd; --line: #2b3750;
+    --accent: #7d9bff; --accent-ink: #0f1522; --gl: #ff7b7b; --cross: #3fc7bd;
+    --box: #2f6f9a; --box-ink: #eaf5ff; --box2: #8a5a1a; --box2-ink: #fff3e0; --ghost: #1e2a40;
+    --ok: #6fd896; --ok-bg: #183526; --warn: #f3c46b; --warn-bg: #3a2e14; --code-bg: #121a2a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1522; --surface: #172033; --fg: #e6ebf5; --muted: #9aa6bd; --line: #2b3750;
+  --accent: #7d9bff; --accent-ink: #0f1522; --gl: #ff7b7b; --cross: #3fc7bd;
+  --box: #2f6f9a; --box-ink: #eaf5ff; --box2: #8a5a1a; --box2-ink: #fff3e0; --ghost: #1e2a40;
+  --ok: #6fd896; --ok-bg: #183526; --warn: #f3c46b; --warn-bg: #3a2e14; --code-bg: #121a2a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg); color: var(--fg);
+  font-family: var(--body); font-size: 17px; line-height: 1.55;
+}
+.wrap {
+  max-width: 1000px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 80px;
+}
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 3.1rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 3.4vw, 2rem); font-weight: 800; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+p { margin: 0; }
+code, pre, textarea { font-family: var(--mono); }
+code { background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 4px; font-size: 0.88em; }
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Header */
+.eyebrow { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 700; }
+header.top { display: grid; gap: 14px; margin-bottom: 28px; }
+.lead { max-width: 64ch; color: var(--muted); font-size: 1.05rem; }
+.props { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.props code { background: var(--surface); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; font-size: 0.85rem; }
+
+section.part { margin-top: 56px; display: grid; gap: 18px; scroll-margin-top: 16px; }
+.part-head { display: grid; gap: 8px; border-top: 3px solid var(--fg); padding-top: 14px; }
+.part-head .eyebrow { color: var(--accent); }
+
+/* Repetition */
+.axes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.axis-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; align-content: start; }
+.axis-card svg { width: 100%; height: auto; max-width: 100%; }
+.axis-card p { font-size: 0.95rem; color: var(--muted); }
+.concepts { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; align-items: center; }
+@media (max-width: 720px) { .concepts { grid-template-columns: 1fr; } }
+.terms { display: grid; gap: 10px; margin: 0; }
+.terms div { display: grid; gap: 2px; }
+.terms dt { font-weight: 700; }
+.terms dd { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.terms dt .gl { color: var(--gl); }
+.tip { background: var(--code-bg); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 0.95rem; }
+
+/* Progress */
+.progress { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: 700; }
+.bar { flex: 1 1 200px; height: 10px; background: var(--ghost); border-radius: 999px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .3s; }
+
+/* Challenge */
+.challenge { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 14px; }
+.challenge.done { border-color: var(--ok); }
+.ch-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.ch-num { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.status { margin-left: auto; font-size: 0.85rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--ghost); color: var(--muted); }
+.status.ok { background: var(--ok-bg); color: var(--ok); }
+.status.almost { background: var(--warn-bg); color: var(--warn); }
+.ch-task { max-width: 70ch; }
+.stage { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 720px) { .stage { grid-template-columns: 1fr; } }
+.pane { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.pane-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--muted); }
+.frame {
+  height: 262px; border: 2px solid var(--fg); position: relative; overflow: hidden;
+  padding: 22px 6px 6px 22px;   /* plats för linjenummer upptill och till vänster */
+  font-family: var(--body);
+}
+.frame.target { border-style: dashed; border-color: var(--muted); }
+.b {
+  font-size: 1.1rem; line-height: 1.6; padding: 0 0.5em; font-weight: 700; min-width: 0;
+  border: 2px solid var(--box-ink); background: var(--box); color: var(--box-ink);
+  font-family: var(--mono);
+  display: flex; align-items: center; justify-content: center;
+}
+.b.lab { background: var(--box2); border-color: var(--box2-ink); color: var(--box2-ink); }
+.frame.target .b { background: var(--ghost); border-style: dashed; border-color: var(--muted); color: var(--muted); }
+.frame.target .b.lab { border-color: var(--box2-ink); color: var(--fg); border-style: dashed; }
+
+/* Grid-linjer (overlay) */
+.gl-layer { position: absolute; inset: 0; pointer-events: none; }
+.gl-v, .gl-h { position: absolute; opacity: .85; }
+.gl-v { top: 0; bottom: 0; border-left: 1.5px dashed var(--gl); }
+.gl-h { left: 0; right: 0; border-top: 1.5px dashed var(--gl); }
+.gl-n {
+  position: absolute; font: 700 11px/1 var(--mono); color: var(--gl);
+  background: var(--surface); padding: 1px 3px; border-radius: 3px; transform: translateX(-50%);
+}
+.gl-n.row { transform: translateY(-50%); }
+
+.editors { display: grid; gap: 10px; }
+.editors.multi { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.editor { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--code-bg); }
+.editor.readonly { opacity: .9; }
+.editor .sel { font-family: var(--mono); font-size: 0.92rem; padding: 8px 12px 0; color: var(--muted); }
+.editor .sel b { color: var(--fg); }
+.editor pre { margin: 0; padding: 4px 12px 4px 30px; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; color: var(--muted); }
+.editor textarea {
+  width: 100%; min-height: 96px; resize: vertical; border: 0; background: transparent; color: var(--fg);
+  font-size: 0.95rem; line-height: 1.6; padding: 4px 12px 4px 30px; outline: none;
+}
+.editors.multi textarea { min-height: 72px; }
+.editor textarea:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.given-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--muted); }
+.read { font-size: 0.85rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; min-height: 1.4em; font-variant-numeric: tabular-nums; }
+.read .k { color: var(--fg); font-weight: 700; }
+.read .g { color: var(--gl); font-weight: 700; }
+.note { font-size: 0.92rem; color: var(--warn); font-weight: 700; }
+.ch-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+button {
+  font: inherit; font-weight: 700; font-size: 0.92rem; cursor: pointer;
+  border-radius: 8px; padding: 8px 14px; border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+}
+button:hover { border-color: var(--accent); }
+button[aria-pressed="true"] { border-color: var(--gl); color: var(--gl); }
+.hint { background: var(--code-bg); border-left: 3px solid var(--cross); padding: 10px 14px; border-radius: 0 8px 8px 0; font-size: 0.95rem; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Lektion 5 · CSS Grid</span>
+    <h1>Kodutmaningar: Grid</h1>
+    <p class="lead">Skriv CSS så att din lekplats ser ut som målet. Sidan rättar automatiskt medan du skriver, och de röda siffrorna visar var grid-linjerna hamnar.</p>
+    <div class="props" aria-label="Det här övar du på">
+      <code>display: grid</code><code>grid-template-columns</code><code>fr</code><code>repeat()</code><code>grid-template-rows</code><code>gap</code><code>grid-column</code><code>grid-row</code><code>span</code>
+    </div>
+  </header>
+
+  <section class="part" aria-labelledby="repetition">
+    <div class="part-head">
+      <span class="eyebrow">Repetition</span>
+      <h2 id="repetition">Flexbox eller grid?</h2>
+      <p class="lead">Flexbox lägger saker på en rad <em>eller</em> i en kolumn. Grid styr rader <em>och</em> kolumner samtidigt, och det är layouten som bestämmer var sakerna hamnar.</p>
+    </div>
+    <div class="axes">
+      <div class="axis-card">
+        <h3>Flexbox: en dimension</h3>
+        <svg viewBox="0 0 300 120" role="img" aria-label="Flexbox: tre rutor på en rad med en pil åt höger">
+          <g font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" text-anchor="middle">
+            <rect x="30" y="24" width="70" height="44" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="65" y="52" fill="var(--box-ink)">1</text>
+            <rect x="110" y="24" width="56" height="44" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="138" y="52" fill="var(--box-ink)">2</text>
+            <rect x="176" y="24" width="94" height="44" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="223" y="52" fill="var(--box-ink)">3</text>
+          </g>
+          <line x1="30" y1="94" x2="262" y2="94" stroke="var(--accent)" stroke-width="3"/>
+          <polygon points="272,94 260,88 260,100" fill="var(--accent)"/>
+        </svg>
+        <p>Rad ELLER kolumn. Innehållet bestämmer storleken. Perfekt för menyer och rader med knappar.</p>
+      </div>
+      <div class="axis-card">
+        <h3>Grid: två dimensioner</h3>
+        <svg viewBox="0 0 300 120" role="img" aria-label="Grid: sex rutor i tre kolumner och två rader med pilar åt höger och nedåt">
+          <g font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" text-anchor="middle">
+            <rect x="50" y="10" width="68" height="40" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="84" y="36" fill="var(--box-ink)">1</text>
+            <rect x="126" y="10" width="68" height="40" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="160" y="36" fill="var(--box-ink)">2</text>
+            <rect x="202" y="10" width="68" height="40" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="236" y="36" fill="var(--box-ink)">3</text>
+            <rect x="50" y="58" width="68" height="40" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="84" y="84" fill="var(--box-ink)">4</text>
+            <rect x="126" y="58" width="68" height="40" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="160" y="84" fill="var(--box-ink)">5</text>
+            <rect x="202" y="58" width="68" height="40" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="236" y="84" fill="var(--box-ink)">6</text>
+          </g>
+          <line x1="50" y1="112" x2="262" y2="112" stroke="var(--accent)" stroke-width="3"/>
+          <polygon points="272,112 260,106 260,118" fill="var(--accent)"/>
+          <line x1="30" y1="10" x2="30" y2="90" stroke="var(--accent)" stroke-width="3"/>
+          <polygon points="30,100 24,88 36,88" fill="var(--accent)"/>
+        </svg>
+        <p>Rader OCH kolumner samtidigt. Perfekt för hela sidor och gallerier.</p>
+      </div>
+    </div>
+    <p class="tip"><b>Tumregel:</b> grid för helheten (sidans layout), flexbox för delarna (t.ex. menyn). De fungerar utmärkt tillsammans!</p>
+
+    <div class="axis-card">
+      <h3>Grundbegrepp</h3>
+      <div class="concepts">
+        <svg viewBox="0 0 320 210" role="img" aria-label="En grid-container med tre kolumner och två rader. Kolumnlinjerna är numrerade 1 till 4 och radlinjerna 1 till 3.">
+          <rect x="34" y="30" width="270" height="168" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="6 5"/>
+          <g font-family="JetBrains Mono, monospace" font-size="16" font-weight="700" text-anchor="middle">
+            <rect x="34" y="30" width="80" height="76" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="74" y="74" fill="var(--box-ink)">1</text>
+            <rect x="129" y="30" width="80" height="76" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="169" y="74" fill="var(--box-ink)">2</text>
+            <rect x="224" y="30" width="80" height="76" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="264" y="74" fill="var(--box-ink)">3</text>
+            <rect x="34" y="122" width="80" height="76" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="74" y="166" fill="var(--box-ink)">4</text>
+            <rect x="129" y="122" width="80" height="76" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="169" y="166" fill="var(--box-ink)">5</text>
+            <rect x="224" y="122" width="80" height="76" fill="var(--box)" stroke="var(--box-ink)" stroke-width="2"/><text x="264" y="166" fill="var(--box-ink)">6</text>
+          </g>
+          <g stroke="var(--gl)" stroke-width="1.5" stroke-dasharray="4 3">
+            <line x1="34" y1="18" x2="34" y2="206"/><line x1="121.5" y1="18" x2="121.5" y2="206"/>
+            <line x1="216.5" y1="18" x2="216.5" y2="206"/><line x1="304" y1="18" x2="304" y2="206"/>
+            <line x1="22" y1="30" x2="312" y2="30"/><line x1="22" y1="114" x2="312" y2="114"/><line x1="22" y1="198" x2="312" y2="198"/>
+          </g>
+          <g fill="var(--gl)" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" text-anchor="middle">
+            <text x="34" y="13">1</text><text x="121.5" y="13">2</text><text x="216.5" y="13">3</text><text x="304" y="13">4</text>
+            <text x="11" y="34">1</text><text x="11" y="118">2</text><text x="11" y="202">3</text>
+          </g>
+        </svg>
+        <dl class="terms">
+          <div><dt>Grid container</dt><dd>Elementet som får <code>display: grid</code> (streckad ram).</dd></div>
+          <div><dt>Grid item</dt><dd>Varje direkt barn till containern (de blå rutorna).</dd></div>
+          <div><dt>Kolumn / rad</dt><dd>Spåren som rutorna ligger i. Här: 3 kolumner, 2 rader.</dd></div>
+          <div><dt>Gap</dt><dd>Mellanrummet mellan rader och kolumner.</dd></div>
+          <div><dt><span class="gl">Grid-linjer</span></dt><dd>Linjerna mellan spåren. Numreras från 1. 3 kolumner = 4 linjer!</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="part" id="utmaningar" aria-labelledby="h-a">
+    <div class="part-head">
+      <span class="eyebrow">Live-kodning</span>
+      <h2 id="h-a">Kodutmaningar</h2>
+      <p class="lead">Utmaning 1–7 har samma HTML: en <code>#container</code> med sex <code>.box</code>. Skriv CSS för <code>#container</code>. I utmaning 8–10 är containern redan klar, och du placerar de orangea rutorna med grid-linjer. Gör utmaningarna i ordning, de blir svårare.</p>
+    </div>
+    <div class="progress"><span id="prog-text">0 av 0 klara</span><div class="bar" aria-hidden="true"><i id="prog-bar"></i></div></div>
+    <div id="challenges" style="display:grid;gap:18px"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+  var PLACE = "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 8px;";
+
+  var challenges = [
+    { t: "Från block till grid",
+      task: "Rutorna ligger under varandra eftersom de är blockelement. Gör om behållaren till en grid med <b>tre kolumner</b> som är <b>90px</b> breda var.",
+      sol: "display: grid; grid-template-columns: 90px 90px 90px;",
+      hint: "Du behöver två rader CSS: en som gör behållaren till en grid och en med ett värde per kolumn." },
+    { t: "Dela på bredden",
+      task: "Gör <b>två kolumner</b> som delar exakt lika på hela bredden, oavsett hur bred skärmen är.",
+      sol: "display: grid; grid-template-columns: 1fr 1fr;",
+      req: [{ re: /fr/, msg: "Det ser rätt ut, men använd enheten fr så att det fungerar på alla skärmar." }],
+      hint: "fr betyder andel (fraction). Två lika stora andelar." },
+    { t: "Dubbelt så bred",
+      task: "Tre kolumner som fyller hela bredden, där <b>mittenkolumnen är dubbelt så bred</b> som de andra.",
+      sol: "display: grid; grid-template-columns: 1fr 2fr 1fr;",
+      req: [{ re: /fr/, msg: "Använd enheten fr." }],
+      hint: "Om ytterkolumnerna får 1 andel var, hur många andelar ska mitten ha?" },
+    { t: "Fast och flexibelt",
+      task: "Första kolumnen ska vara exakt <b>120px</b>. De två andra kolumnerna ska dela lika på <b>det som blir kvar</b>.",
+      sol: "display: grid; grid-template-columns: 120px 1fr 1fr;",
+      req: [{ re: /120px/, msg: "Första kolumnen ska vara 120px." }, { re: /fr/, msg: "Använd fr för kolumnerna som delar på resten." }],
+      hint: "Du kan blanda enheter. fr delar på det utrymme som blir kvar efter de fasta måtten." },
+    { t: "Upprepa dig inte",
+      task: "Gör <b>fyra lika breda kolumner</b>, men skriv inte <code>1fr</code> fyra gånger.",
+      sol: "display: grid; grid-template-columns: repeat(4, 1fr);",
+      req: [{ re: /repeat\s*\(/, msg: "Rätt layout! Men skriv det kortare med repeat()." }],
+      hint: "repeat(antal, storlek) är samma sak som att skriva storleken flera gånger." },
+    { t: "Bestäm radhöjden",
+      task: "Tre lika breda kolumner. Båda raderna ska vara exakt <b>60px</b> höga.",
+      sol: "display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 60px 60px;",
+      hint: "grid-template-rows fungerar som grid-template-columns, fast för höjden: ett värde per rad." },
+    { t: "Luft mellan rutorna",
+      task: "Tre lika breda kolumner och två rader som är <b>70px</b> höga. Det ska vara <b>24px</b> mellan raderna och <b>8px</b> mellan kolumnerna.",
+      sol: "display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: 70px 70px; gap: 24px 8px;",
+      hint: "gap kan ta två värden: först mellanrummet mellan raderna, sedan mellan kolumnerna." },
+    { t: "Bred och hög",
+      container: PLACE, labels: ["a", "b", 1, 2, 3, 4, 5, 6, 7],
+      task: "Containern har fyra kolumner och tre rader. Ruta <b>a</b> ska gå från linje 1 till linje 3. Ruta <b>b</b> ska ligga i sista kolumnen och gå från översta till nedersta radlinjen. De blå rutorna fyller resten automatiskt.",
+      items: { a: "grid-column: 1 / 3;", b: "grid-column: 4; grid-row: 1 / -1;" },
+      hint: "Vi räknar linjer, inte rutor. Skrivs ett enda tal börjar rutan på den linjen. -1 betyder sista linjen." },
+    { t: "Span",
+      container: PLACE, labels: ["a", 1, "b", "c", 2, 3],
+      task: "Ruta <b>a</b> ska täcka hela första raden. Ruta <b>b</b> ska börja på linje 2 och ta tre rutor. Ruta <b>c</b> ska ta två rutor där den hamnar. Använd <code>-1</code> och <code>span</code>.",
+      items: { a: "grid-column: 1 / -1;", b: "grid-column: 2 / span 3;", c: "grid-column: span 2;" },
+      req: [{ re: /-1/, msg: "Snyggt! Prova att skriva a med -1 (sista linjen)." }, { re: /span/, msg: "Snyggt! Prova att skriva b och c med span." }],
+      hint: "1 / -1 = från första till sista linjen. span 2 = ta två rutor. 2 / span 3 = börja på linje 2 och ta tre rutor." },
+    { t: "Vilka linjer? X, Y och Z",
+      container: PLACE, labels: ["X", "Y", "Z", 1, 2, 3],
+      task: "Titta på de röda linjenumren i målet och placera <b>X</b>, <b>Y</b> och <b>Z</b>. Bonus: hittar du två olika sätt att skriva Z?",
+      items: { x: "grid-column: 1 / 3;", y: "grid-column: 4; grid-row: 1 / 4;", z: "grid-column: 2 / 4; grid-row: 2 / 4;" },
+      hint: "Z behöver både grid-column och grid-row. Läs av vilken linje rutan börjar och slutar på, åt båda hållen." }
+  ];
+
+  var host = document.getElementById("challenges");
+  var done = {};
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function boxesHTML(labels) {
+    return labels.map(function (l) {
+      var isLab = typeof l === "string";
+      return '<div class="b' + (isLab ? ' lab" data-k="' + l.toLowerCase() : "") + '">' + esc(l) + "</div>";
+    }).join("");
+  }
+  function px(list) {
+    if (!list || list === "none") return [];
+    var out = [], m, re = /(-?[\d.]+)px/g;
+    while ((m = re.exec(list))) out.push(parseFloat(m[1]));
+    return out;
+  }
+  function gapPx(v) { var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+
+  /* Räknar ut var spåren och linjerna ligger, relativt ramens padding-box */
+  function geometry(frame) {
+    var cs = getComputedStyle(frame);
+    if (cs.display !== "grid" && cs.display !== "inline-grid") return null;
+    var cols = px(cs.gridTemplateColumns), rows = px(cs.gridTemplateRows);
+    var cg = gapPx(cs.columnGap), rg = gapPx(cs.rowGap);
+    function axis(tracks, gap, start) {
+      var s = [], e = [], p = start;
+      tracks.forEach(function (t) { s.push(p); e.push(p + t); p += t + gap; });
+      var lines = [];
+      for (var i = 0; i <= tracks.length; i++) {
+        if (i === 0) lines.push(s[0]);
+        else if (i === tracks.length) lines.push(e[i - 1]);
+        else lines.push((e[i - 1] + s[i]) / 2);
+      }
+      return { tracks: tracks, starts: s, ends: e, lines: lines, gap: gap };
+    }
+    return { cols: axis(cols, cg, parseFloat(cs.paddingLeft)), rows: axis(rows, rg, parseFloat(cs.paddingTop)) };
+  }
+
+  function drawLines(frame, on) {
+    var old = frame.querySelector(".gl-layer");
+    if (old) old.remove();
+    if (!on) return;
+    var g = geometry(frame);
+    if (!g || !g.cols.tracks.length) return;
+    var layer = document.createElement("div");
+    layer.className = "gl-layer";
+    layer.setAttribute("aria-hidden", "true");
+    var h = "";
+    g.cols.lines.forEach(function (x, i) {
+      h += '<div class="gl-v" style="left:' + x + 'px"></div><span class="gl-n" style="left:' + x + 'px;top:4px">' + (i + 1) + "</span>";
+    });
+    if (g.rows.tracks.length) g.rows.lines.forEach(function (y, i) {
+      h += '<div class="gl-h" style="top:' + y + 'px"></div><span class="gl-n row" style="top:' + y + 'px;left:3px">' + (i + 1) + "</span>";
+    });
+    layer.innerHTML = h;
+    frame.appendChild(layer);
+  }
+
+  function rects(frame) {
+    var fr = frame.getBoundingClientRect();
+    return Array.prototype.map.call(frame.querySelectorAll(".b"), function (b) {
+      var r = b.getBoundingClientRect();
+      return [r.left - fr.left, r.top - fr.top, r.width, r.height];
+    });
+  }
+  function same(a, b) {
+    if (a.length !== b.length) return false;
+    for (var i = 0; i < a.length; i++)
+      for (var j = 0; j < 4; j++) if (Math.abs(a[i][j] - b[i][j]) > 1.5) return false;
+    return true;
+  }
+
+  function lineOf(pos, arr, offset) {
+    for (var i = 0; i < arr.length; i++) if (Math.abs(arr[i] - pos) < 1.5) return i + offset;
+    return "?";
+  }
+  function readout(frame, c) {
+    var g = geometry(frame);
+    if (!g) return "<span>Inte en grid-container ännu.</span>";
+    var r = function (a) { return a.map(function (v) { return Math.round(v) + "px"; }).join(" "); };
+    if (!c.items) {
+      return '<span><span class="k">Kolumner:</span> ' + (r(g.cols.tracks) || "1 (auto)") + "</span>" +
+             '<span><span class="k">Rader:</span> ' + r(g.rows.tracks) + "</span>" +
+             '<span><span class="k">gap:</span> ' + Math.round(g.rows.gap) + "px " + Math.round(g.cols.gap) + "px</span>";
+    }
+    var fr = frame.getBoundingClientRect(), cs = getComputedStyle(frame);
+    var bl = parseFloat(cs.borderLeftWidth), bt = parseFloat(cs.borderTopWidth);
+    return Object.keys(c.items).map(function (k) {
+      var b = frame.querySelector('[data-k="' + k + '"]'), br = b.getBoundingClientRect();
+      var L = br.left - fr.left - bl, T = br.top - fr.top - bt;
+      var c1 = lineOf(L, g.cols.starts, 1), c2 = lineOf(L + br.width, g.cols.ends, 2);
+      var r1 = lineOf(T, g.rows.starts, 1), r2 = lineOf(T + br.height, g.rows.ends, 2);
+      return '<span><span class="k">' + esc(b.textContent) + ":</span> kolumn <span class=\"g\">" + c1 + " / " + c2 +
+             '</span>, rad <span class="g">' + r1 + " / " + r2 + "</span></span>";
+    }).join("");
+  }
+
+  function updateProgress() {
+    var n = Object.keys(done).filter(function (k) { return done[k]; }).length;
+    document.getElementById("prog-text").textContent = n + " av " + challenges.length + " klara";
+    document.getElementById("prog-bar").style.width = (100 * n / challenges.length) + "%";
+  }
+
+  function tabKeys(ta) {
+    ta.addEventListener("keydown", function (e) {
+      if (e.key === "Tab" && !e.shiftKey) {
+        e.preventDefault();
+        var s = ta.selectionStart;
+        ta.value = ta.value.slice(0, s) + "  " + ta.value.slice(ta.selectionEnd);
+        ta.selectionStart = ta.selectionEnd = s + 2;
+        ta.dispatchEvent(new Event("input"));
+      }
+    });
+  }
+
+  challenges.forEach(function (c, i) {
+    var id = "ch" + (i + 1);
+    var labels = c.labels || [1, 2, 3, 4, 5, 6];
+    var showLines = !!c.items;
+    var editors;
+    if (c.items) {
+      editors =
+        '<div class="editor readonly"><span class="sel"><span class="given-label">Färdig kod · </span>#container {</span><pre>' +
+        c.container.split("; ").join(";\n").replace(/;?$/, ";") + '</pre><span class="sel" style="padding-bottom:8px">}</span></div>' +
+        '<div class="editors multi">' + Object.keys(c.items).map(function (k) {
+          return '<label class="editor" for="' + id + "-" + k + '"><span class="sel"><b>.' + k + '</b> {</span>' +
+            '<textarea id="' + id + "-" + k + '" data-k="' + k + '" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="skriv din CSS här"></textarea>' +
+            '<span class="sel" style="padding-bottom:8px">}</span></label>';
+        }).join("") + "</div>";
+    } else {
+      editors =
+        '<label class="editor" for="' + id + '-css"><span class="sel">#container {</span>' +
+        '<textarea id="' + id + '-css" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="skriv din CSS här"></textarea>' +
+        '<span class="sel" style="padding-bottom:8px">}</span></label>';
+    }
+    var el = document.createElement("article");
+    el.className = "challenge";
+    el.innerHTML =
+      '<div class="ch-head"><span class="ch-num">' + String(i + 1).padStart(2, "0") + "</span><h3>" + c.t + '</h3><span class="status" id="' + id + '-status">Inte klar</span></div>' +
+      '<p class="ch-task">' + c.task + "</p>" +
+      '<div class="stage">' +
+        '<div class="pane"><span class="pane-label">Mål</span><div class="frame target">' + boxesHTML(labels) + "</div></div>" +
+        '<div class="pane"><span class="pane-label">Din lekplats</span><div class="frame play">' + boxesHTML(labels) + "</div>" +
+        '<div class="read" aria-live="polite"></div></div>' +
+      "</div>" +
+      editors +
+      '<p class="note" hidden></p>' +
+      '<div class="ch-actions"><button type="button" class="hintbtn">Visa ledtråd</button><button type="button" class="linesbtn" aria-pressed="' + showLines + '">Visa grid-linjer</button><button type="button" class="clear">Börja om</button></div>' +
+      '<p class="hint" hidden>' + c.hint + "</p>";
+    host.appendChild(el);
+
+    var target = el.querySelector(".frame.target");
+    var play = el.querySelector(".frame.play");
+    var read = el.querySelector(".read");
+    var note = el.querySelector(".note");
+    var status = el.querySelector(".status");
+    var tas = Array.prototype.slice.call(el.querySelectorAll("textarea"));
+    var linesBtn = el.querySelector(".linesbtn");
+
+    if (c.items) {
+      target.style.cssText = c.container;
+      play.style.cssText = c.container;
+      Object.keys(c.items).forEach(function (k) { target.querySelector('[data-k="' + k + '"]').style.cssText = c.items[k]; });
+    } else {
+      target.style.cssText = c.sol;
+    }
+
+    function clean(s) { return s.trim().replace(/[{}]/g, ""); }
+    function check() {
+      if (c.items) {
+        tas.forEach(function (ta) { play.querySelector('[data-k="' + ta.dataset.k + '"]').style.cssText = clean(ta.value); });
+      } else {
+        play.style.cssText = clean(tas[0].value);
+      }
+      var lines = linesBtn.getAttribute("aria-pressed") === "true";
+      drawLines(target, lines);
+      drawLines(play, lines);
+      read.innerHTML = readout(play, c);
+      var all = tas.map(function (t) { return t.value; }).join("\n");
+      var syntaxOk = tas.every(function (t) { return t.value.trim() !== "" && /;\s*$/.test(t.value.trim()); });
+      var match = syntaxOk && same(rects(play), rects(target));
+      var miss = (c.req || []).filter(function (r) { return !r.re.test(all); })[0];
+      var ok = match && !miss;
+      done[id] = ok;
+      el.classList.toggle("done", ok);
+      status.classList.toggle("ok", ok);
+      status.classList.toggle("almost", match && !!miss);
+      status.textContent = ok ? "✓ Klar" : (match && miss ? "Nästan!" : "Inte klar");
+      note.hidden = !(match && miss);
+      note.textContent = match && miss ? miss.msg : "";
+      updateProgress();
+    }
+
+    tas.forEach(function (ta) {
+      var key = "gridovn-" + ta.id;
+      var saved = store.get(key);
+      if (saved) ta.value = saved;
+      ta.addEventListener("input", function () { store.set(key, ta.value); check(); });
+      tabKeys(ta);
+    });
+    el.querySelector(".hintbtn").addEventListener("click", function () {
+      var h = el.querySelector(".hint"); h.hidden = !h.hidden;
+      this.textContent = h.hidden ? "Visa ledtråd" : "Dölj ledtråd";
+    });
+    linesBtn.addEventListener("click", function () {
+      this.setAttribute("aria-pressed", this.getAttribute("aria-pressed") === "true" ? "false" : "true");
+      check();
+    });
+    el.querySelector(".clear").addEventListener("click", function () {
+      tas.forEach(function (ta) { ta.value = ""; store.set("gridovn-" + ta.id, ""); });
+      check(); tas[0].focus();
+    });
+    el._check = check;
+  });
+
+  function checkAll() { Array.prototype.forEach.call(host.children, function (el) { el._check(); }); }
+  checkAll();
+  window.addEventListener("resize", function () { clearTimeout(window.__rt); window.__rt = setTimeout(checkAll, 120); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(checkAll);
+})();
+</script>
+</body>
+</html>
